@@ -14,7 +14,7 @@ Thumbs.db
 
 # composer vendor dir
 /vendor
-/web/media/*
+/web/media/
 /web/vendors/*
 
 # composer itself is not needed
