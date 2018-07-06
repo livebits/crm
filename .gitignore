@@ -16,6 +16,7 @@ Thumbs.db
 /vendor
 /web/media/
 /web/vendors/*
+/config/db.php
 
 # composer itself is not needed
 composer.phar
