@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Source;
 use Yii;
 use yii\filters\AccessControl;
 use app\models\Customer;
@@ -100,6 +101,20 @@ class CustomerController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
+            if(@$_FILES){
+                $uploaded_files = $_FILES['Customer'];
+                $file_name = $uploaded_files['name']['image'];
+                if($file_name)
+                {
+                    $file_name = 'image'. time(). $file_name;
+                    $file_tmp = $uploaded_files['tmp_name']['image'];
+                    move_uploaded_file($file_tmp, 'Uploads/' . $file_name);
+
+                    $model->image = $file_name;
+                    $model->save();
+                }
+            }
+
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -120,6 +135,20 @@ class CustomerController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+
+            if(@$_FILES){
+                $uploaded_files = $_FILES['Customer'];
+                $file_name = $uploaded_files['name']['image'];
+                if($file_name)
+                {
+                    $file_name = 'image'. time(). $file_name;
+                    $file_tmp = $uploaded_files['tmp_name']['image'];
+                    move_uploaded_file($file_tmp, 'Uploads/' . $file_name);
+
+                    $model->image = $file_name;
+                    $model->save();
+                }
+            }
 
             $updated_status = $model->status;
 

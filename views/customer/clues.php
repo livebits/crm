@@ -52,7 +52,16 @@ $this->params['breadcrumbs'][] = $this->title;
                                     return $model->firstName . ' ' . $model->lastName;
                                 }
                             ],
-                            'source',
+                            [
+                                'attribute' => 'source',
+                                'value' => function($model) {
+                                    $source = \app\models\Source::find()
+                                        ->select('name')
+                                        ->where('id='.$model->source)
+                                        ->one();
+                                    return $source->name;
+                                }
+                            ],
                             [
                                 'format' => 'raw',
                                 'label' => 'اطلاعات تماس',

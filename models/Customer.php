@@ -18,6 +18,7 @@ use app\behaviors\JDateTimeBehavior;
  * @property string $phone
  * @property string $source
  * @property string $description
+ * @property string $image
  * @property int $status
  * @property int $created_at
  * @property int $updated_at
@@ -52,9 +53,10 @@ class Customer extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['description'], 'string'],
-            [['firstName', 'lastName', 'companyName', 'position', 'mobile', 'phone', 'source'], 'string', 'max' => 255],
+            [['user_id', 'status', 'created_at', 'updated_at', 'source'], 'integer'],
+            [['description', 'image'], 'string'],
+            [['lastName', 'mobile', 'source'], 'required', 'message' => 'لطفاً {attribute} را وارد نمایید.'],
+            [['firstName', 'lastName', 'companyName', 'position', 'mobile', 'phone'], 'string', 'max' => 255],
         ];
     }
 
@@ -66,6 +68,7 @@ class Customer extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'user_id' => 'User ID',
+            'image' => 'تصویر',
             'firstName' => 'نام',
             'lastName' => 'نام خانوادگی',
             'companyName' => 'نام شرکت',
@@ -100,5 +103,16 @@ class Customer extends \yii\db\ActiveRecord
         } else {
             return false;
         }
+    }
+
+    public function get_all_sources()
+    {
+        $sources = Source::find()->select(['id', 'name'])->all();
+        $result = [];
+        foreach ($sources as $source) {
+            $result[$source['id']] = $source['name'];
+        }
+
+        return $result;
     }
 }

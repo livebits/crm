@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Customer;
+use app\models\UserProfile;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -68,11 +69,11 @@ class SiteController extends Controller
         $clues_count = $customers_count = $deals_count = 0;
 
         foreach ($customers as $customer) {
-            if($customer->status == Customer::$CLUE) {
+            if ($customer->status == Customer::$CLUE) {
                 $clues_count++;
-            } else if($customer->status == Customer::$CUSTOMER) {
+            } else if ($customer->status == Customer::$CUSTOMER) {
                 $customers_count++;
-            } else if($customer->status == Customer::$DEALING) {
+            } else if ($customer->status == Customer::$DEALING) {
                 $deals_count++;
             }
         }
@@ -420,5 +421,39 @@ class SiteController extends Controller
         $searchModel = new \app\models\User();
         $dataProvider = $searchModel->search(Yii::$app->request->get());
         return $this->render('users', compact('searchModel', 'dataProvider'));
+    }
+
+    public function actionProfile()
+    {
+        $model = UserProfile::find()
+            ->where('user_id=' . Yii::$app->user->id)
+            ->one();
+
+        if (!$model) {
+            $model = new UserProfile();
+        }
+
+        if (Yii::$app->request->isPost) {
+
+            $model->firstName = Yii::$app->request->post('UserProfile')['firstName'];
+            $model->lastName = Yii::$app->request->post('UserProfile')['lastName'];
+            $model->user_id = Yii::$app->request->post('UserProfile')['user_id'];
+
+            if (@$_FILES) {
+                $uploaded_files = $_FILES['UserProfile'];
+                $file_name = $uploaded_files['name']['image'];
+                if ($file_name) {
+                    $file_name = 'image' . time() . $file_name;
+                    $file_tmp = $uploaded_files['tmp_name']['image'];
+                    move_uploaded_file($file_tmp, 'Uploads/' . $file_name);
+
+                    $model->image = $file_name;
+                }
+            }
+
+            $model->save();
+        }
+
+        return $this->render('profile', compact('model'));
     }
 }

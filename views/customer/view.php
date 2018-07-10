@@ -43,7 +43,16 @@ $this->params['breadcrumbs'][] = $this->title;
             'position',
             'mobile',
             'phone',
-            'source',
+            [
+                'attribute' => 'source',
+                'value' => function($model) {
+                    $source = \app\models\Source::find()
+                        ->select('name')
+                        ->where('id='.$model->source)
+                        ->one();
+                    return $source->name;
+                }
+            ],
             'description:ntext',
             [
                     'attribute' => 'created_at',

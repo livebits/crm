@@ -42,11 +42,34 @@ AppAsset::register($this);
                 <!-- menu profile quick info -->
                 <div class="profile clearfix">
                     <div class="profile_pic">
-                        <img src="<?=Yii::$app->homeUrl?>images/img.jpg" alt="..." class="img-circle profile_img">
+                        <a href="<?=Yii::$app->homeUrl?>site/profile">
+                            <?php
+                            $userProfile = \app\models\UserProfile::find()
+                                ->where('user_id=' . Yii::$app->user->id)
+                                ->one();
+
+                            if($userProfile && $userProfile->image != "") {
+                                ?>
+                                <img src="<?=Yii::$app->homeUrl?>Uploads/<?=$userProfile->image?>" alt="..." class="img-circle profile_img">
+                                <?php
+                            } else {
+                                ?>
+                                <img src="<?= Yii::$app->homeUrl ?>images/no_image.png" alt="..."
+                                     class="img-circle profile_img">
+                                <?php
+                            }
+                            ?>
+                        </a>
                     </div>
                     <div class="profile_info">
                         <h2><?=Yii::$app->user->username?></h2>
-                        <span>خوش آمدید</span>
+                        <?php
+                        if($userProfile && $userProfile->firstName != "") {
+                            ?>
+                            <span><?php echo $userProfile->firstName . ' ' . $userProfile->lastName; ?> </span>
+                            <?php
+                        }
+                        ?>
                     </div>
                 </div>
                 <!-- /menu profile quick info -->
@@ -116,7 +139,17 @@ AppAsset::register($this);
                         <li class="">
                             <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown"
                                aria-expanded="false">
-                                <img src="<?=Yii::$app->homeUrl?>images/img.jpg" alt="">
+                                <?php
+                                if($userProfile && $userProfile->image != "") {
+                                    ?>
+                                    <img src="<?=Yii::$app->homeUrl?>Uploads/<?=$userProfile->image?>">
+                                    <?php
+                                } else {
+                                    ?>
+                                    <img src="<?= Yii::$app->homeUrl ?>images/no_image.png">
+                                    <?php
+                                }
+                                ?>
                                 <?=Yii::$app->user->username?>
                                 <span class=" fa fa-angle-down"></span>
                             </a>

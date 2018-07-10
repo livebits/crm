@@ -41,7 +41,19 @@ $this->params['breadcrumbs'][] = $this->title;
                         <div class="col-md-4 doc-right">
 
                             <div class="customer-image">
-                                <img src="<?= Yii::$app->homeUrl?>images/img.jpg" class="img-responsive img-circle">
+                                <?php
+                                    if(!isset($customer->image)) {
+                                        ?>
+                                        <img src="<?= Yii::$app->homeUrl ?>images/no_image.png"
+                                             class="img-responsive img-circle">
+                                        <?php
+                                    } else {
+                                        ?>
+                                        <img src="<?= Yii::$app->homeUrl ?>Uploads/<?= $customer->image ?>"
+                                             class="img-responsive img-circle">
+                                        <?php
+                                    }
+                                ?>
                             </div>
 
                             <div class="customer-info">
