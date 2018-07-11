@@ -4,23 +4,21 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\models\CustomerSearch */
+/* @var $searchModel app\models\DealSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'سر نخ';
+$customer = \app\models\Customer::findOne($_GET['customer_id']);
+$this->title = 'معاملات مشتری: ' . $customer->firstName . ' ' . $customer->lastName;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="customer-index">
-
-    <!--    --><?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+<div class="deal-index">
 
     <div class="page-title">
         <div class="title_left">
 
         </div>
         <div class="title_right" style="width: 100%;text-align: left;">
-
-            <?= Html::a('ایجاد سرنخ', ['create'], ['class' => 'btn btn-success']) ?>
+            <?= Html::a('ایجاد معامله', ['create?customer_id='.$_GET['customer_id']], ['class' => 'btn btn-success']) ?>
         </div>
     </div>
     <div class="clearfix"></div>
@@ -45,40 +43,32 @@ $this->params['breadcrumbs'][] = $this->title;
                         'filterModel' => $searchModel,
                         'columns' => [
                             ['class' => 'yii\grid\SerialColumn'],
+
                             [
-                                'attribute' => 'firstName',
-                                'label' => 'نام سرنخ',
+                                'attribute' => 'customer_id',
+                                'label' => 'نام مشتری',
                                 'value' => function($model) {
                                     return $model->firstName . ' ' . $model->lastName;
                                 }
                             ],
+                            'subject',
+                            'price',
                             [
-                                'attribute' => 'source',
+//                'attribute' => 'customer_id',
+                                'label' => 'تلفن',
                                 'value' => function($model) {
-                                    $source = \app\models\Source::find()
-                                        ->select('name')
-                                        ->where('id='.$model->source)
-                                        ->one();
-                                    return $source->name;
+                                    $customer = \app\models\Customer::find($model->customer_id)->one();
+                                    return $customer->mobile;
                                 }
                             ],
                             [
-                                'format' => 'raw',
-                                'label' => 'اطلاعات تماس',
+                                'label' => 'آخرین مذاکره',
                                 'value' => function($model) {
-                                    return $model->mobile . "<br>" . $model->phone;
-                                }
-                            ],
-                            [
-                                'label' => 'سطح رضایت',
-                                'format' => 'raw',
-                                'value' => function($model) {
-                                    $average = isset($model->sum_rating) ? floor($model->sum_rating / $model->meetingCount) : 0;
-                                    $text = '';
-                                    for ($i=0; $i<$average; $i++){
-                                        $text .= '<span style="color: #fc0;" class="fa fa-star"></span>';
+                                    if(isset($model->latestMeeting)) {
+                                        return \app\components\Jdf::jdate('Y/m/d', $model->latestMeeting);
+                                    } else {
+                                        return '';
                                     }
-                                    return $text;
                                 }
                             ],
                             [
@@ -92,50 +82,56 @@ $this->params['breadcrumbs'][] = $this->title;
                                 }
                             ],
                             [
-                                'label' => 'تاریخ آخرین پیگیری',
+                                'attribute' => 'level',
+                                'label' => 'مرحله',
                                 'value' => function($model) {
-                                    if(isset($model->latestMeeting)) {
-                                        return \app\components\Jdf::jdate('Y/m/d', $model->latestMeeting);
-                                    } else {
-                                        return '';
-                                    }
+                                    $arr = [
+                                        "0" => "پیش پرداخت",
+                                        "1" => "پیش نویس",
+                                    ];
+                                    return $arr[$model->level];
                                 }
                             ],
-//                            'companyName',
-                            //'position',
-                            //'mobile',
-                            //'phone',
-                            //'description:ntext',
-                            //'status',
-                            //'createdAt',
-                            //'updatedAt',
+                            //'created_at',
+                            //'updated_at',
 
-//                            ['class' => 'yii\grid\ActionColumn'],
                             [
                                 'class' => 'yii\grid\ActionColumn',
-                                'template' => '{view} {update} {delete} {meeting}',
+                                'template' => '{view} {update} {meeting}',
                                 'header' => 'عملیات',
                                 'buttons' => [
+                                    'view' => function($url, $model, $id){
+
+                                        $url = Yii::$app->urlManager->createUrl([
+                                            'deal/view',
+                                            'id' => $model->id,
+                                            'customer_id' => $model->customer_id,
+                                        ]);
+
+                                        return '<a href="' . $url . '" class="fa fa-eye" title="مشاهده"></a>';
+                                    },
+                                    'update' => function($url, $model, $id){
+
+                                        $url = Yii::$app->urlManager->createUrl([
+                                            'deal/update',
+                                            'id' => $model->id,
+                                            'customer_id' => $model->customer_id,
+                                        ]);
+
+                                        return '<a href="' . $url . '" class="fa fa-pencil" title="ویرایش"></a>';
+                                    },
                                     'meeting' => function($url, $model, $id){
 
                                         $url = Yii::$app->urlManager->createUrl([
-                                            'meeting/index',
-                                            'customer_id' => $model->id,
+                                            'meeting/deal-index',
+                                            'deal_id' => $model->id,
+                                            'customer_id' => $model->customer_id,
                                         ]);
 
                                         return '<a href="' . $url . '" class="fa fa-comments" title="جلسات"></a>';
                                     },
-                                    'delete' => function($url, $model, $id) {
-
-                                        $url = Yii::$app->urlManager->createUrl([
-                                            'customer/delete',
-                                            'id' => $model->id,
-                                        ]);
-
-                                        return '<a style="color:red;" href="' . $url . '" class="fa fa-remove" title="انتقال به مخاطبین"></a>';
-                                    }
                                 ]
-                            ]
+                            ],
                         ],
                     ]); ?>
 

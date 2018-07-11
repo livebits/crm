@@ -3,31 +3,24 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Customer */
+/* @var $model app\models\Deal */
 
-if($model->status == 0){
-    $page_title = "ویرایش سرنخ";
-} else if($model->status == 1){
-    $page_title = "ویرایش مشتری";
-} else if($model->status == 2){
-    $page_title = "ویرایش معامله";
-} else if($model->status == 3){
-    $page_title = "ویرایش مخاطب";
-}
-
-$this->title = $page_title . ': ' . $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Customers', 'url' => ['index']];
+$this->title = 'ویرایش معامله: ' . $model->id;
+$this->params['breadcrumbs'][] = ['label' => 'Deals', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
-<div class="customer-update">
+<div class="deal-update">
 
     <div class="page-title">
         <div class="title_left">
 
         </div>
         <div class="title_right" style="width: 100%;text-align: left;">
-
+            <a href="index?customer_id=<?=$_GET['customer_id']?>" class="btn btn-info panel-edit">
+                <span class="fa fa-arrow-left"></span>
+                لیست معاملات
+            </a>
         </div>
     </div>
     <div class="clearfix"></div>

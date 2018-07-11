@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\components\Jdf;
 use app\models\Customer;
+use app\models\Deal;
 use app\models\Media;
 use app\models\MediaFile;
 use app\models\User;
@@ -54,6 +55,20 @@ class MeetingController extends Controller
         ]);
     }
 
+    public function actionDealIndex($deal_id)
+    {
+        $searchModel = new MeetingSearch();
+        $dataProvider = $searchModel->searchForDeals(Yii::$app->request->queryParams, $deal_id);
+        $deal = Deal::find()->where('id=' . $deal_id)->one();
+        $customer = Customer::find()->where('id=' . $deal->customer_id)->one();
+
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'customer' => $customer,
+        ]);
+    }
+
     /**
      * Displays a single Meeting model.
      * @param integer $id
@@ -63,6 +78,13 @@ class MeetingController extends Controller
     public function actionView($id, $customer_id)
     {
         return $this->render('view', [
+            'model' => $this->findModel($id),
+        ]);
+    }
+
+    public function actionViewDeal($id, $deal_id)
+    {
+        return $this->render('view-deal', [
             'model' => $this->findModel($id),
         ]);
     }
@@ -142,6 +164,83 @@ class MeetingController extends Controller
         return $this->render('create', [
             'model' => $model,
             'customer' => $customer,
+            'user' => $user,
+            'imageMediaFile' => $imageMediaFile,
+            'soundMediaFile' => $soundMediaFile,
+            'otherMediaFile' => $otherMediaFile,
+        ]);
+    }
+
+    public function actionCreateDealMeeting($deal_id)
+    {
+        $model = new Meeting();
+        $imageMediaFile = new MediaFile();
+        $soundMediaFile = new MediaFile();
+        $otherMediaFile = new MediaFile();
+
+        $request = Yii::$app->request;
+
+        if ($request->isPost) {
+            $imageFileIds = $request->post('imageFiles');
+            $audioFileIds = $request->post('audioFiles');
+            $otherFileIds = $request->post('otherFiles');
+
+            $meetingData = $request->post('Meeting');
+
+            //add new meeting
+            $meeting = new Meeting();
+            $meeting->user_id = Yii::$app->user->id;
+            $meeting->deal_id = intval($deal_id);
+            $meeting->content = $meetingData['content'];
+            $meeting->rating = isset($meetingData['rating']) ? intval($meetingData['rating']) : 1;
+
+            $created_at_date = explode('/', $meetingData['created_at']);
+            $created_at_date_g = Jdf::jalali_to_gregorian($created_at_date[0], $created_at_date[1], $created_at_date[2], '-');
+            $meeting->created_at = strtotime($created_at_date_g);
+
+            $next_date = explode('/', $meetingData['next_date']);
+            $next_date_g = Jdf::jalali_to_gregorian($next_date[0], $next_date[1], $next_date[2], '-');
+            $meeting->next_date = strtotime($next_date_g);
+
+            $meeting->save(false);
+
+            if ($imageFileIds != "") {
+                $mediaIds = explode(',', $imageFileIds);
+
+                foreach ($mediaIds as $mediaId) {
+                    Media::updateAll(['meeting_id' => $meeting->id], ['id' => $mediaId]);
+                }
+            }
+
+            if ($audioFileIds != "") {
+                $mediaIds = explode(',', $audioFileIds);
+
+                foreach ($mediaIds as $mediaId) {
+                    Media::updateAll(['meeting_id' => $meeting->id], ['id' => $mediaId]);
+                }
+            }
+
+            if ($otherFileIds != "") {
+                $mediaIds = explode(',', $otherFileIds);
+
+                foreach ($mediaIds as $mediaId) {
+                    Media::updateAll(['meeting_id' => $meeting->id], ['id' => $mediaId]);
+                }
+            }
+
+            return $this->redirect(['view-deal', 'id' => $meeting->id, 'deal_id' => $deal_id]);
+        }
+
+        $deal = Deal::find()->where('id=' . $deal_id)->one();
+        $user = (new \yii\db\Query())
+            ->select('*')
+            ->from('user')
+            ->where('id=' . Yii::$app->user->id)
+            ->one();
+
+        return $this->render('create-deal-meeting', [
+            'model' => $model,
+            'deal' => $deal,
             'user' => $user,
             'imageMediaFile' => $imageMediaFile,
             'soundMediaFile' => $soundMediaFile,
@@ -311,6 +410,82 @@ class MeetingController extends Controller
         return $this->render('update', [
             'model' => $meeting,
             'customer' => $customer,
+            'user' => $user,
+            'imageMediaFile' => $imageMediaFile,
+            'soundMediaFile' => $soundMediaFile,
+            'otherMediaFile' => $otherMediaFile,
+        ]);
+    }
+
+
+    public function actionUpdateDeal($id, $deal_id)
+    {
+        $meeting = $this->findModel($id);
+        $imageMediaFile = new MediaFile();
+        $soundMediaFile = new MediaFile();
+        $otherMediaFile = new MediaFile();
+
+        $request = Yii::$app->request;
+        if ($request->isPost) {
+            $imageFileIds = $request->post('imageFiles');
+            $audioFileIds = $request->post('audioFiles');
+            $otherFileIds = $request->post('otherFiles');
+
+            $meetingData = $request->post('Meeting');
+
+            //add new meeting
+//            $meeting->user_id = Yii::$app->user->id;
+//            $meeting->customer_id = intval($customer_id);
+            $meeting->content = $meetingData['content'];
+            $meeting->rating = isset($meetingData['rating']) ? intval($meetingData['rating']) : 1;
+
+            $created_at_date = explode('/', $meetingData['created_at']);
+            $created_at_date_g = Jdf::jalali_to_gregorian($created_at_date[0], $created_at_date[1], $created_at_date[2], '-');
+            $meeting->created_at = strtotime($created_at_date_g);
+
+            $next_date = explode('/', $meetingData['next_date']);
+            $next_date_g = Jdf::jalali_to_gregorian($next_date[0], $next_date[1], $next_date[2], '-');
+            $meeting->next_date = strtotime($next_date_g);
+
+            $meeting->save(false);
+
+            if ($imageFileIds != "") {
+                $mediaIds = explode(',', $imageFileIds);
+
+                foreach ($mediaIds as $mediaId) {
+                    Media::updateAll(['meeting_id' => $meeting->id], ['id' => $mediaId]);
+                }
+            }
+
+            if ($audioFileIds != "") {
+                $mediaIds = explode(',', $audioFileIds);
+
+                foreach ($mediaIds as $mediaId) {
+                    Media::updateAll(['meeting_id' => $meeting->id], ['id' => $mediaId]);
+                }
+            }
+
+            if ($otherFileIds != "") {
+                $mediaIds = explode(',', $otherFileIds);
+
+                foreach ($mediaIds as $mediaId) {
+                    Media::updateAll(['meeting_id' => $meeting->id], ['id' => $mediaId]);
+                }
+            }
+
+            return $this->redirect(['view-deal', 'id' => $meeting->id, 'deal_id' => $deal_id]);
+        }
+
+        $deal = Deal::find()->where('id=' . $deal_id)->one();
+        $user = (new \yii\db\Query())
+            ->select('*')
+            ->from('user')
+            ->where('id=' . Yii::$app->user->id)
+            ->one();
+
+        return $this->render('update-deal', [
+            'model' => $meeting,
+            'deal' => $deal,
             'user' => $user,
             'imageMediaFile' => $imageMediaFile,
             'soundMediaFile' => $soundMediaFile,

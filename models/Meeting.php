@@ -10,6 +10,7 @@ use Yii;
  * @property int $id
  * @property int $user_id
  * @property int $customer_id
+ * @property int $deal_id
  * @property string $content
  * @property int $created_at
  * @property int $updated_at
@@ -32,7 +33,7 @@ class Meeting extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'customer_id', 'rating'], 'integer'],
+            [['user_id', 'customer_id', 'deal_id', 'rating'], 'integer'],
             [['content', 'created_at', 'updated_at', 'next_date'], 'string'],
             [['rating', 'content', 'created_at', 'next_date'], 'required', 'message' => 'لطفاً {attribute} را وارد نمایید.']
         ];
@@ -47,6 +48,7 @@ class Meeting extends \yii\db\ActiveRecord
             'id' => 'کد جلسه',
             'user_id' => 'کاربر مسئول',
             'customer_id' => 'مشتری',
+            'deal_id' => 'معامله',
             'content' => 'توضیحات',
             'created_at' => 'تاریخ جلسه',
             'updated_at' => 'Updated At',

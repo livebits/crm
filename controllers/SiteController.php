@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Customer;
+use app\models\Deal;
 use app\models\UserProfile;
 use Yii;
 use yii\filters\AccessControl;
@@ -66,19 +67,21 @@ class SiteController extends Controller
     public function actionIndex()
     {
         $customers = Customer::find()->all();
-        $clues_count = $customers_count = $deals_count = 0;
+        $clues_count = $customers_count = $deals_count = $contacts_count = 0;
+
+        $deals_count = Deal::find()->count();
 
         foreach ($customers as $customer) {
             if ($customer->status == Customer::$CLUE) {
                 $clues_count++;
             } else if ($customer->status == Customer::$CUSTOMER) {
                 $customers_count++;
-            } else if ($customer->status == Customer::$DEALING) {
-                $deals_count++;
+            } else if ($customer->status == Customer::$CONTACT) {
+                $contacts_count++;
             }
         }
 
-        return $this->render('dashboard', compact('clues_count', 'customers_count', 'deals_count'));
+        return $this->render('dashboard', compact('clues_count', 'customers_count', 'deals_count', 'contacts_count'));
     }
 
     /**

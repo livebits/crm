@@ -3,8 +3,17 @@
 use yii\helpers\Html;
 
 ?>
-
-<a href="<?=Yii::$app->homeUrl?>meeting/view?id=<?=$model->id?>&customer_id=<?=$_GET['customer_id']?>">
+<?php
+if(!isset($_GET['deal_id'])) {
+?>
+<a href="<?= Yii::$app->homeUrl ?>meeting/view?id=<?= $model->id ?>&customer_id=<?= $_GET['customer_id'] ?>">
+    <?php
+    } else {
+        ?>
+    <a href="<?= Yii::$app->homeUrl ?>meeting/view-deal?id=<?= $model->id ?>&deal_id=<?= $_GET['deal_id'] ?>">
+        <?php
+    }
+    ?>
     <div class="meeting-box">
 
         <div class="meet-info">

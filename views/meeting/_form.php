@@ -22,7 +22,13 @@ use dosamigos\fileupload\FileUploadUI;
 
     <?= $form->field($model, 'user_id')->textInput(['readonly' => true, 'value' => '', 'placeholder' => $user['username']]) ?>
 
-    <?= $form->field($model, 'customer_id')->textInput(['readonly' => true, 'value' => '', 'placeholder' => $customer->firstName . ' ' . $customer->lastName]) ?>
+    <?php
+        if(isset($customer)) {
+            echo $form->field($model, 'customer_id')->textInput(['readonly' => true, 'value' => '', 'placeholder' => $customer->firstName . ' ' . $customer->lastName]);
+        } else if (isset($deal)) {
+            echo $form->field($model, 'deal_id')->textInput(['readonly' => true, 'value' => '', 'placeholder' => $deal->subject]);
+        }
+    ?>
 
     <?= $form->field($model, 'content')->textarea(['rows' => 6]) ?>
 

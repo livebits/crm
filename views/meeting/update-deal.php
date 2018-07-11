@@ -3,24 +3,14 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Customer */
+/* @var $model app\models\Meeting */
 
-if($model->status == 0){
-    $page_title = "ویرایش سرنخ";
-} else if($model->status == 1){
-    $page_title = "ویرایش مشتری";
-} else if($model->status == 2){
-    $page_title = "ویرایش معامله";
-} else if($model->status == 3){
-    $page_title = "ویرایش مخاطب";
-}
-
-$this->title = $page_title . ': ' . $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Customers', 'url' => ['index']];
+$this->title = 'ویرایش جلسه: ' . $model->id;
+$this->params['breadcrumbs'][] = ['label' => 'Meetings', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
-<div class="customer-update">
+<div class="meeting-update">
 
     <div class="page-title">
         <div class="title_left">
@@ -28,6 +18,7 @@ $this->params['breadcrumbs'][] = 'Update';
         </div>
         <div class="title_right" style="width: 100%;text-align: left;">
 
+            <a href="<?=Yii::$app->homeUrl?>meeting/deal-index?deal_id=<?=$_GET['deal_id']?>" class="btn btn-success">لیست جلسات</a>
         </div>
     </div>
     <div class="clearfix"></div>
@@ -49,6 +40,11 @@ $this->params['breadcrumbs'][] = 'Update';
 
                     <?= $this->render('_form', [
                         'model' => $model,
+                        'deal' => $deal,
+                        'user' => $user,
+                        'imageMediaFile' => $imageMediaFile,
+                        'soundMediaFile' => $soundMediaFile,
+                        'otherMediaFile' => $otherMediaFile,
                     ]) ?>
 
                 </div>

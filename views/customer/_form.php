@@ -75,12 +75,6 @@ use kartik\widgets\Select2;
                         1 => 'مشتری'
                 ])->label('تغییر وضعیت');
 
-            } else if ($model->status == 1) {
-                echo $form->field($model, 'status')->dropDownList([
-                    1 => 'مشتری',
-                    2 => 'معامله'
-                ])->label('تغییر وضعیت');
-
             }
         }
     ?>

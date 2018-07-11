@@ -34,7 +34,7 @@ class CustomerController extends Controller
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
-                    'delete' => ['POST'],
+//                    'delete' => ['POST'],
                 ],
             ],
         ];
@@ -50,6 +50,17 @@ class CustomerController extends Controller
         $dataProvider = $searchModel->searchClues(Yii::$app->request->queryParams);
 
         return $this->render('clues', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionContacts()
+    {
+        $searchModel = new CustomerSearch();
+        $dataProvider = $searchModel->searchContacts(Yii::$app->request->queryParams);
+
+        return $this->render('contacts', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
@@ -174,9 +185,11 @@ class CustomerController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+        $model->status = Customer::$CONTACT;
+        $model->save();
 
-        return $this->redirect(['index']);
+        return $this->redirect(['contacts']);
     }
 
     /**
@@ -193,5 +206,13 @@ class CustomerController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionConvertToClue($customer_id) {
+        $model = $this->findModel($customer_id);
+        $model->status = Customer::$CLUE;
+        $model->save();
+
+        return $this->redirect(['index']);
     }
 }

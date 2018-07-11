@@ -12,6 +12,8 @@ if($model->status == 0){
     $page_title = "مشاهده مشتری";
 } else if($model->status == 2){
     $page_title = "مشاهده معامله";
+} else if($model->status == 3){
+    $page_title = "مشاهده مخاطب";
 }
 
 $this->title = $page_title . ': ' . $model->id;
@@ -27,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('حذف', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
-                'confirm' => 'آیا از حذف این مورد اطمینان دارید؟',
+                'confirm' => 'آیا از انتقال این مورد به مخاطبین اطمینان دارید؟',
                 'method' => 'post',
             ],
         ]) ?>
