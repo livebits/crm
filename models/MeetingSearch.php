@@ -16,6 +16,9 @@ class MeetingSearch extends Meeting
     public $imagesCount;
     public $audiosCount;
     public $attachsCount;
+    public $customer_code;
+    public $customer_name;
+    public $deal_subject;
     /**
      * {@inheritdoc}
      */
@@ -82,6 +85,98 @@ class MeetingSearch extends Meeting
         ]);
 
         $query->andFilterWhere(['like', 'content', $this->content]);
+
+        return $dataProvider;
+    }
+
+    public function searchCustomersLates($params, $lateMeetingsIds)
+    {
+        $query = $this::find()
+            ->select(['user.username', 'meeting.*', 'customer.id as customer_code',
+                'CONCAT(customer.firstName, " ", customer.lastName) as customer_name'
+                    ])
+            ->from('meeting')
+            ->leftJoin('user', 'user.id=meeting.user_id')
+            ->leftJoin('customer', 'customer.id=meeting.customer_id')
+            ->leftJoin('media', 'media.meeting_id=meeting.id')
+            ->where('meeting.id IN ('.$lateMeetingsIds.')')
+            ->groupBy('meeting.id')
+            ->orderBy('meeting.id DESC');
+
+//        var_export($query->all());die();
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['attributes' => [
+                //Normal columns
+                'next_date',
+            ],],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'id' => $this->id,
+//            'customer_id' => $this->customer_id,
+//            'customer.firstName' => $this->customer_name,
+//            'customer.lastName' => $this->customer_name,
+            'next_date' => $this->next_date,
+        ]);
+
+        return $dataProvider;
+    }
+
+    public function searchDealsLates($params, $lateMeetingsIds)
+    {
+        $query = $this::find()
+            ->select(['user.username', 'meeting.*', 'customer.id as customer_code',
+                'CONCAT(customer.firstName, " ", customer.lastName) as customer_name',
+                'deal.subject as deal_subject'
+                    ])
+            ->from('meeting')
+            ->leftJoin('user', 'user.id=meeting.user_id')
+            ->leftJoin('deal', 'deal.id=meeting.deal_id')
+            ->leftJoin('customer', 'customer.id=deal.customer_id')
+            ->leftJoin('media', 'media.meeting_id=meeting.id')
+            ->where('meeting.id IN ('.$lateMeetingsIds.')')
+            ->groupBy('meeting.id')
+            ->orderBy('meeting.id DESC');
+
+//        var_export($query->all());die();
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['attributes' => [
+                //Normal columns
+                'next_date',
+            ],],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'id' => $this->id,
+//            'customer_id' => $this->customer_id,
+//            'customer.firstName' => $this->customer_name,
+//            'customer.lastName' => $this->customer_name,
+            'next_date' => $this->next_date,
+        ]);
 
         return $dataProvider;
     }

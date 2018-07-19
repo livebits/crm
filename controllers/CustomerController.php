@@ -55,6 +55,17 @@ class CustomerController extends Controller
         ]);
     }
 
+    public function actionOffCustomers()
+    {
+        $searchModel = new CustomerSearch();
+        $dataProvider = $searchModel->searchOffCustomers(Yii::$app->request->queryParams);
+
+        return $this->render('off-customers', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
     public function actionContacts()
     {
         $searchModel = new CustomerSearch();
@@ -186,10 +197,10 @@ class CustomerController extends Controller
     public function actionDelete($id)
     {
         $model = $this->findModel($id);
-        $model->status = Customer::$CONTACT;
+        $model->status = Customer::$OFF_CUSTOMER;
         $model->save();
 
-        return $this->redirect(['contacts']);
+        return $this->redirect(['off-customers']);
     }
 
     /**

@@ -89,6 +89,52 @@ class CustomerSearch extends Customer
         return $dataProvider;
     }
 
+    public function searchOffCustomers($params)
+    {
+        $query = $this::find()
+            ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
+                'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
+                'COUNT(cm.id) as meetingCount'])
+//            ->from('customer')
+            ->where('status="' . Customer::$OFF_CUSTOMER . '"')
+            ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
+            ->groupBy('customer.id');
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'id' => $this->id,
+            'user_id' => $this->user_id,
+            'status' => $this->status,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ]);
+
+        $query->andFilterWhere(['like', 'firstName', $this->firstName])
+            ->andFilterWhere(['like', 'lastName', $this->lastName])
+            ->andFilterWhere(['like', 'companyName', $this->companyName])
+            ->andFilterWhere(['like', 'position', $this->position])
+            ->andFilterWhere(['like', 'mobile', $this->mobile])
+            ->andFilterWhere(['like', 'phone', $this->phone])
+            ->andFilterWhere(['like', 'source', $this->source])
+            ->andFilterWhere(['like', 'description', $this->description]);
+
+        return $dataProvider;
+    }
+
     public function searchContacts($params)
     {
         $query = $this::find()
@@ -96,7 +142,9 @@ class CustomerSearch extends Customer
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
                 'COUNT(cm.id) as meetingCount'])
 //            ->from('customer')
-            ->where('status="' . Customer::$CONTACT . '"')
+            ->where('status="' . Customer::$CLUE . '"')
+            ->orWhere('status="' . Customer::$CUSTOMER . '"')
+            ->orWhere('status="' . Customer::$OFF_CUSTOMER . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
             ->groupBy('customer.id');
 

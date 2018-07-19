@@ -29,7 +29,7 @@ class Customer extends \yii\db\ActiveRecord
     public static $CLUE = 0;
     public static $CUSTOMER = 1;
     public static $DEALING = 2;
-    public static $CONTACT = 3;
+    public static $OFF_CUSTOMER = 3;
     /**
      * {@inheritdoc}
      */

@@ -7,7 +7,7 @@ use yii\grid\GridView;
 /* @var $searchModel app\models\CustomerSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'مخاطبین';
+$this->title = 'جلسات عقب افتاده مشتریان';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="customer-index">
@@ -45,56 +45,25 @@ $this->params['breadcrumbs'][] = $this->title;
                         'columns' => [
                             ['class' => 'yii\grid\SerialColumn'],
                             [
-                                'attribute' => 'firstName',
-                                'label' => 'نام مخاطب',
+                                'attribute' => 'customer_id',
+                                'label' => 'کد مشتری',
                                 'value' => function($model) {
-                                    return $model->firstName . ' ' . $model->lastName;
+                                    return $model->customer_id;
                                 }
                             ],
                             [
-                                'attribute' => 'source',
+                                'attribute' => 'customer_name',
+                                'label' => 'نام مشتری',
                                 'value' => function($model) {
-                                    $source = \app\models\Source::find()
-                                        ->select('name')
-                                        ->where('id='.$model->source)
-                                        ->one();
-                                    return $source->name;
+                                    return $model->customer_name;
                                 }
                             ],
                             [
-                                'format' => 'raw',
-                                'label' => 'اطلاعات تماس',
+                                'attribute' => 'next_date',
+                                'label' => 'تاریخ جلسه عقب افتاده',
                                 'value' => function($model) {
-                                    return $model->mobile . "<br>" . $model->phone;
-                                }
-                            ],
-                            [
-                                'label' => 'سطح رضایت',
-                                'format' => 'raw',
-                                'value' => function($model) {
-                                    $average = isset($model->sum_rating) ? floor($model->sum_rating / $model->meetingCount) : 0;
-                                    $text = '';
-                                    for ($i=0; $i<$average; $i++){
-                                        $text .= '<span style="color: #fc0;" class="fa fa-star"></span>';
-                                    }
-                                    return $text;
-                                }
-                            ],
-                            [
-                                'label' => 'تاریخ پیگیری بعدی',
-                                'value' => function($model) {
-                                    if(isset($model->nextMeeting)) {
-                                        return \app\components\Jdf::jdate('Y/m/d', $model->nextMeeting);
-                                    } else {
-                                        return '';
-                                    }
-                                }
-                            ],
-                            [
-                                'label' => 'تاریخ آخرین پیگیری',
-                                'value' => function($model) {
-                                    if(isset($model->latestMeeting)) {
-                                        return \app\components\Jdf::jdate('Y/m/d', $model->latestMeeting);
+                                    if(isset($model->next_date)) {
+                                        return \app\components\Jdf::jdate('Y/m/d', $model->next_date);
                                     } else {
                                         return '';
                                     }
@@ -112,17 +81,17 @@ $this->params['breadcrumbs'][] = $this->title;
 //                            ['class' => 'yii\grid\ActionColumn'],
                             [
                                 'class' => 'yii\grid\ActionColumn',
-                                'template' => '{view} {update} {meeting}',
+                                'template' => '{meeting}',
                                 'header' => 'عملیات',
                                 'buttons' => [
                                     'meeting' => function($url, $model, $id){
 
                                         $url = Yii::$app->urlManager->createUrl([
                                             'meeting/index',
-                                            'customer_id' => $model->id,
+                                            'customer_id' => $model->customer_id,
                                         ]);
 
-                                        return '<a href="' . $url . '" class="fa fa-comments" title="جلسات"></a>';
+                                        return '<a href="' . $url . '" class="fa fa-comments" title="مشاهده پرونده"></a>';
                                     },
                                 ]
                             ]

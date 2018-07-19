@@ -69,6 +69,74 @@ class MeetingController extends Controller
         ]);
     }
 
+    public function actionLateCustomers() {
+
+        $customers_meetings = Meeting::find()
+            ->where('deal_id IS NULL')
+            ->andWhere('next_date IS NOT NULL')
+            ->orderBy('created_at DESC')
+            ->all();
+
+        $lateMeetingsIds = [];
+        $customer_ids = [];
+        foreach ($customers_meetings as $customers_meeting) {
+
+            if (in_array($customers_meeting->customer_id, $customer_ids)) {
+                continue;
+            }
+
+            $customer_ids[] = $customers_meeting->customer_id;
+            if(date('Y-m-d', $customers_meeting->next_date) < date('Y-m-d', time())){
+
+                $lateMeetingsIds[] = $customers_meeting->id;
+            }
+        }
+
+        $lateMeetingsIds = implode(",",$lateMeetingsIds);
+
+        $searchModel = new MeetingSearch();
+        $dataProvider = $searchModel->searchCustomersLates(Yii::$app->request->queryParams, $lateMeetingsIds);
+
+        return $this->render('late-customers', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider
+        ]);
+    }
+
+    public function actionLateDeals() {
+
+        $deals_meetings = Meeting::find()
+            ->where('customer_id IS NULL')
+            ->andWhere('next_date IS NOT NULL')
+            ->orderBy('created_at DESC')
+            ->all();
+
+        $lateMeetingsIds = [];
+        $deal_ids = [];
+        foreach ($deals_meetings as $deals_meeting) {
+
+            if (in_array($deals_meeting->deal_id, $deal_ids)) {
+                continue;
+            }
+
+            $deal_ids[] = $deals_meeting->deal_id;
+            if(date('Y-m-d', $deals_meeting->next_date) < date('Y-m-d', time())){
+
+                $lateMeetingsIds[] = $deals_meeting->id;
+            }
+        }
+
+        $lateMeetingsIds = implode(",",$lateMeetingsIds);
+
+        $searchModel = new MeetingSearch();
+        $dataProvider = $searchModel->searchDealsLates(Yii::$app->request->queryParams, $lateMeetingsIds);
+
+        return $this->render('late-deals', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider
+        ]);
+    }
+
     /**
      * Displays a single Meeting model.
      * @param integer $id

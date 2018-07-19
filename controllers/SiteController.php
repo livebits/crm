@@ -4,8 +4,10 @@ namespace app\controllers;
 
 use app\models\Customer;
 use app\models\Deal;
+use app\models\Meeting;
 use app\models\UserProfile;
 use Yii;
+use yii\db\Query;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
@@ -67,7 +69,7 @@ class SiteController extends Controller
     public function actionIndex()
     {
         $customers = Customer::find()->all();
-        $clues_count = $customers_count = $deals_count = $contacts_count = 0;
+        $clues_count = $customers_count = $deals_count = $off_customer = $contacts_count = 0;
 
         $deals_count = Deal::find()->count();
 
@@ -76,12 +78,69 @@ class SiteController extends Controller
                 $clues_count++;
             } else if ($customer->status == Customer::$CUSTOMER) {
                 $customers_count++;
-            } else if ($customer->status == Customer::$CONTACT) {
-                $contacts_count++;
+            } else if ($customer->status == Customer::$OFF_CUSTOMER) {
+                $off_customer++;
+            }
+        }
+        $contacts_count = $clues_count + $customers_count + $off_customer;
+
+        //check meetings
+//        $customers_meetings = (new Query())
+//            ->select(['meeting.id', 'meeting.user_id', 'SUBSTRING_INDEX(SUBSTRING_INDEX(FROM_UNIXTIME(meeting.next_date), \' \', 1), \' \', -1) AS meeting_date',
+//                'SUBSTRING_INDEX(SUBSTRING_INDEX(FROM_UNIXTIME(m.created_at), \' \', 1), \' \', -1) AS next_meeting_date'])
+//            ->from('meeting')
+//            ->leftJoin('meeting as m', 'm.customer_id=meeting.customer_id')
+//            ->where('meeting.deal_id IS NULL')
+//            ->andWhere('m.deal_id IS NULL')
+//            ->andWhere('meeting.next_date IS NOT NULL')
+//            ->andWhere('m.next_date IS NOT NULL')
+////            ->andWhere('meeting_date = next_meeting_date')
+//            ->groupBy('meeting.id')
+//            ->all();
+        $customers_meetings = Meeting::find()
+            ->where('deal_id IS NULL')
+            ->andWhere('next_date IS NOT NULL')
+            ->orderBy('created_at DESC')
+            ->all();
+
+        $lateCustomerMeetingsCount = 0;
+        $customer_ids = [];
+        foreach ($customers_meetings as $customers_meeting) {
+
+            if (in_array($customers_meeting->customer_id, $customer_ids)) {
+                continue;
+            }
+
+            $customer_ids[] = $customers_meeting->customer_id;
+            if(date('Y-m-d', $customers_meeting->next_date) < date('Y-m-d', time())){
+
+                $lateCustomerMeetingsCount++;
             }
         }
 
-        return $this->render('dashboard', compact('clues_count', 'customers_count', 'deals_count', 'contacts_count'));
+        $deals_meetings = Meeting::find()
+            ->where('customer_id IS NULL')
+            ->andWhere('next_date IS NOT NULL')
+            ->orderBy('created_at DESC')
+            ->all();
+
+        $lateDealMeetingsCount = 0;
+        $deal_ids = [];
+        foreach ($deals_meetings as $deals_meeting) {
+
+            if (in_array($deals_meeting->deal_id, $deal_ids)) {
+                continue;
+            }
+
+            $deal_ids[] = $deals_meeting->deal_id;
+            if(date('Y-m-d', $deals_meeting->next_date) < date('Y-m-d', time())){
+
+                $lateDealMeetingsCount++;
+            }
+        }
+
+
+        return $this->render('dashboard', compact('clues_count', 'customers_count', 'deals_count', 'contacts_count', 'off_customer', 'lateCustomerMeetingsCount', 'lateDealMeetingsCount'));
     }
 
     /**

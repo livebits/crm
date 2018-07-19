@@ -7,7 +7,7 @@ use yii\grid\GridView;
 /* @var $searchModel app\models\CustomerSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'سر نخ';
+$this->title = 'سرنخ های غیرفعال';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="customer-index">
@@ -20,7 +20,6 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
         <div class="title_right" style="width: 100%;text-align: left;">
 
-            <?= Html::a('ایجاد سرنخ', ['create'], ['class' => 'btn btn-success']) ?>
         </div>
     </div>
     <div class="clearfix"></div>
@@ -113,7 +112,7 @@ $this->params['breadcrumbs'][] = $this->title;
 //                            ['class' => 'yii\grid\ActionColumn'],
                             [
                                 'class' => 'yii\grid\ActionColumn',
-                                'template' => '{view} {update} {delete} {meeting}',
+                                'template' => '{view} {update} {clue} {meeting}',
                                 'header' => 'عملیات',
                                 'buttons' => [
                                     'meeting' => function($url, $model, $id){
@@ -125,15 +124,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                         return '<a href="' . $url . '" class="fa fa-comments" title="جلسات"></a>';
                                     },
-                                    'delete' => function($url, $model, $id) {
+                                    'clue' => function($url, $model, $id){
 
                                         $url = Yii::$app->urlManager->createUrl([
-                                            'customer/delete',
-                                            'id' => $model->id,
+                                            'customer/convert-to-clue',
+                                            'customer_id' => $model->id,
                                         ]);
 
-                                        return '<a style="color:red;" href="' . $url . '" class="fa fa-remove" title="انتقال به سرنخ های غیرفعال"></a>';
-                                    }
+                                        return '<a href="' . $url . '" class="fa fa-arrow-circle-right" title="تبدیل به سرنخ"></a>';
+                                    },
                                 ]
                             ]
                         ],
