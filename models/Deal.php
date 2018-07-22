@@ -51,4 +51,15 @@ class Deal extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
         ];
     }
+
+    public function get_all_deal_levels()
+    {
+        $deal_levels = DealLevel::find()->select(['id', 'level_number', 'level_name'])->all();
+        $result = [];
+        foreach ($deal_levels as $deal_level) {
+            $result[$deal_level['id']] = $deal_level['level_name'];
+        }
+
+        return $result;
+    }
 }

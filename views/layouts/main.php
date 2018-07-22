@@ -248,6 +248,8 @@ AppAsset::register($this);
                 <p class="pull-left">&copy; AKAF <?= date('Y') ?></p>
 
                 <p class="pull-right">تمام حقوق برای آکاف محفوظ می باشد.</p>
+                <p class="pull-right" style="margin-right: 10px;color: #0a0a0a;">  نسخه <?= Yii::$app->params['app_version']?></p>
+
             </div>
         </footer>
         <!-- /footer content -->

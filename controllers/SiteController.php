@@ -517,5 +517,9 @@ class SiteController extends Controller
         }
 
         return $this->render('profile', compact('model'));
+}
+
+    public function actionChangelog() {
+        return $this->render('changelog');
     }
 }

@@ -12,11 +12,15 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="deal-index">
 
+    <?php  echo $this->render('_search', ['searchModel' => $searchModel]); ?>
+
     <div class="page-title">
         <div class="title_left">
 
         </div>
         <div class="title_right" style="width: 100%;text-align: left;">
+
+            <?= Html::a('ثبت مراحل قرارداد', Yii::$app->homeUrl . 'deal-level', ['class' => 'btn btn-success']) ?>
         </div>
     </div>
     <div class="clearfix"></div>
@@ -83,12 +87,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'attribute' => 'level',
                                 'label' => 'مرحله',
                                 'value' => function($model) {
-                                    $arr = [
-                                        "0" => "پیش پرداخت",
-                                        "1" => "پیش نویس",
-                                    ];
-                                    return $arr[$model->level];
-                                }
+
+                                    return$model->levelName;
+                                },
                             ],
                             //'created_at',
                             //'updated_at',

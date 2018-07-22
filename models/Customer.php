@@ -116,4 +116,18 @@ class Customer extends \yii\db\ActiveRecord
 
         return $result;
     }
+
+    public static function getPassengerName($id)
+    {
+        $self = Customer::find()
+            ->select([
+                'id',
+                'firstName',
+                'lastName'
+            ])
+            ->where(['id' => $id])
+            ->asArray()
+            ->one();
+        return $self['firstName'] . ' ' . $self['lastName'];
+    }
 }

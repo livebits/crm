@@ -12,6 +12,11 @@ use app\models\Customer;
  */
 class CustomerSearch extends Customer
 {
+    public $FirstName;
+    public $LastName;
+    public $Mobile;
+    public $Source;
+
     public $meetingCount;
     public $sum_rating;
     public $latestMeeting;
@@ -23,7 +28,8 @@ class CustomerSearch extends Customer
     public function rules()
     {
         return [
-            [['id', 'user_id', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['id', 'user_id', 'status', 'Mobile', 'Source', 'created_at', 'updated_at'], 'integer'],
+            [['FirstName', 'LastName'], 'string'],
         ];
     }
 
@@ -49,42 +55,47 @@ class CustomerSearch extends Customer
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
                 'COUNT(cm.id) as meetingCount'])
-//            ->from('customer')
+            ->from('customer')
             ->where('status="' . Customer::$CLUE . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
             ->groupBy('customer.id');
 
         // add conditions that should always apply here
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
+//        $dataProvider = new ActiveDataProvider([
+//            'query' => $query,
+//        ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
-            return $dataProvider;
+//            return $dataProvider;
         }
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            'customer.id' => $this->id,
             'user_id' => $this->user_id,
             'status' => $this->status,
+            'source' => $this->source,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['like', 'firstName', $this->firstName])
-            ->andFilterWhere(['like', 'lastName', $this->lastName])
+        $query->andFilterWhere(['like', 'firstName', $this->FirstName])
+            ->andFilterWhere(['like', 'lastName', $this->LastName])
             ->andFilterWhere(['like', 'companyName', $this->companyName])
             ->andFilterWhere(['like', 'position', $this->position])
-            ->andFilterWhere(['like', 'mobile', $this->mobile])
-            ->andFilterWhere(['like', 'phone', $this->phone])
-            ->andFilterWhere(['like', 'source', $this->source])
+            ->andFilterWhere(['=', 'mobile', $this->Mobile])
+            ->andFilterWhere(['=', 'phone', $this->phone])
+            ->andFilterWhere(['=', 'source', $this->Source])
             ->andFilterWhere(['like', 'description', $this->description]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
 
         return $dataProvider;
     }
@@ -102,35 +113,39 @@ class CustomerSearch extends Customer
 
         // add conditions that should always apply here
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
+//        $dataProvider = new ActiveDataProvider([
+//            'query' => $query,
+//        ]);
 
         $this->load($params);
 
-        if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
-        }
+//        if (!$this->validate()) {
+//            // uncomment the following line if you do not want to return any records when validation fails
+//            // $query->where('0=1');
+//            return $dataProvider;
+//        }
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            'customer.id' => $this->id,
             'user_id' => $this->user_id,
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['like', 'firstName', $this->firstName])
-            ->andFilterWhere(['like', 'lastName', $this->lastName])
+        $query->andFilterWhere(['like', 'firstName', $this->FirstName])
+            ->andFilterWhere(['like', 'lastName', $this->LastName])
             ->andFilterWhere(['like', 'companyName', $this->companyName])
             ->andFilterWhere(['like', 'position', $this->position])
-            ->andFilterWhere(['like', 'mobile', $this->mobile])
+            ->andFilterWhere(['like', 'mobile', $this->Mobile])
             ->andFilterWhere(['like', 'phone', $this->phone])
-            ->andFilterWhere(['like', 'source', $this->source])
+            ->andFilterWhere(['like', 'source', $this->Source])
             ->andFilterWhere(['like', 'description', $this->description]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
 
         return $dataProvider;
     }
@@ -150,35 +165,39 @@ class CustomerSearch extends Customer
 
         // add conditions that should always apply here
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
+//        $dataProvider = new ActiveDataProvider([
+//            'query' => $query,
+//        ]);
 
         $this->load($params);
 
-        if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
-        }
+//        if (!$this->validate()) {
+//            // uncomment the following line if you do not want to return any records when validation fails
+//            // $query->where('0=1');
+//            return $dataProvider;
+//        }
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            'customer.id' => $this->id,
             'user_id' => $this->user_id,
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['like', 'firstName', $this->firstName])
-            ->andFilterWhere(['like', 'lastName', $this->lastName])
+        $query->andFilterWhere(['like', 'firstName', $this->FirstName])
+            ->andFilterWhere(['like', 'lastName', $this->LastName])
             ->andFilterWhere(['like', 'companyName', $this->companyName])
             ->andFilterWhere(['like', 'position', $this->position])
-            ->andFilterWhere(['like', 'mobile', $this->mobile])
+            ->andFilterWhere(['like', 'mobile', $this->Mobile])
             ->andFilterWhere(['like', 'phone', $this->phone])
-            ->andFilterWhere(['like', 'source', $this->source])
+            ->andFilterWhere(['like', 'source', $this->Source])
             ->andFilterWhere(['like', 'description', $this->description]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
 
         return $dataProvider;
     }
@@ -196,35 +215,39 @@ class CustomerSearch extends Customer
 
         // add conditions that should always apply here
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
+//        $dataProvider = new ActiveDataProvider([
+//            'query' => $query,
+//        ]);
 
         $this->load($params);
 
-        if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
-        }
+//        if (!$this->validate()) {
+//            // uncomment the following line if you do not want to return any records when validation fails
+//            // $query->where('0=1');
+//            return $dataProvider;
+//        }
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            'customer.id' => $this->id,
             'user_id' => $this->user_id,
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['like', 'firstName', $this->firstName])
-            ->andFilterWhere(['like', 'lastName', $this->lastName])
+        $query->andFilterWhere(['like', 'firstName', $this->FirstName])
+            ->andFilterWhere(['like', 'lastName', $this->LastName])
             ->andFilterWhere(['like', 'companyName', $this->companyName])
             ->andFilterWhere(['like', 'position', $this->position])
-            ->andFilterWhere(['like', 'mobile', $this->mobile])
+            ->andFilterWhere(['like', 'mobile', $this->Mobile])
             ->andFilterWhere(['like', 'phone', $this->phone])
-            ->andFilterWhere(['like', 'source', $this->source])
+            ->andFilterWhere(['like', 'source', $this->Source])
             ->andFilterWhere(['like', 'description', $this->description]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
 
         return $dataProvider;
     }
@@ -242,17 +265,17 @@ class CustomerSearch extends Customer
 
         // add conditions that should always apply here
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
+//        $dataProvider = new ActiveDataProvider([
+//            'query' => $query,
+//        ]);
 
         $this->load($params);
 
-        if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
-        }
+//        if (!$this->validate()) {
+//            // uncomment the following line if you do not want to return any records when validation fails
+//            // $query->where('0=1');
+//            return $dataProvider;
+//        }
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -271,6 +294,10 @@ class CustomerSearch extends Customer
             ->andFilterWhere(['like', 'phone', $this->phone])
             ->andFilterWhere(['like', 'source', $this->source])
             ->andFilterWhere(['like', 'description', $this->description]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
 
         return $dataProvider;
     }

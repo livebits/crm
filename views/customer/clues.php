@@ -12,7 +12,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="customer-index">
 
-    <!--    --><?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php  echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <div class="page-title">
         <div class="title_left">
@@ -55,11 +55,15 @@ $this->params['breadcrumbs'][] = $this->title;
                             [
                                 'attribute' => 'source',
                                 'value' => function($model) {
-                                    $source = \app\models\Source::find()
-                                        ->select('name')
-                                        ->where('id='.$model->source)
-                                        ->one();
-                                    return $source->name;
+                                    if($model->source) {
+                                        $source = \app\models\Source::find()
+                                            ->select('name')
+                                            ->where('id=' . $model->source)
+                                            ->one();
+                                        return $source->name;
+                                    } else {
+                                        return '';
+                                    }
                                 }
                             ],
                             [

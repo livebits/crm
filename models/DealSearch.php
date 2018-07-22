@@ -20,6 +20,8 @@ class DealSearch extends Deal
     public $firstName;
     public $lastName;
     public $mobile;
+    public $levelName;
+    public $customerName;
 
     /**
      * {@inheritdoc}
@@ -92,32 +94,29 @@ class DealSearch extends Deal
     public function searchAll($params)
     {
         $query = $this::find()
-            ->select(['deal.*', 'cu.firstName', 'cu.lastName', 'cu.mobile',
+            ->select(['deal.*', 'cu.id as customerName', 'cu.firstName', 'cu.lastName', 'cu.mobile', 'deal_level.level_name as levelName',
                 'SUM(m.rating) as sum_rating', 'MAX(m.created_at) as latestMeeting',
                 'MAX(m.next_date) as nextMeeting', 'COUNT(m.id) as meetingCount'])
             ->from('deal')
             ->leftJoin('customer as cu', 'cu.id=deal.customer_id')
             ->leftJoin('meeting as m', 'm.deal_id=deal.id')
+            ->leftJoin('deal_level', 'deal_level.id=deal.level')
             ->groupBy('deal.id');
 
         // add conditions that should always apply here
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
-
         $this->load($params);
 
-        if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
-        }
+//        if (!$this->validate()) {
+//            // uncomment the following line if you do not want to return any records when validation fails
+//            // $query->where('0=1');
+//            return $dataProvider;
+//        }
 
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'customer_id' => $this->customer_id,
+            'deal.customer_id' => $this->customer_id,
             'price' => $this->price,
             'level' => $this->level,
             'created_at' => $this->created_at,
@@ -125,6 +124,11 @@ class DealSearch extends Deal
         ]);
 
         $query->andFilterWhere(['like', 'subject', $this->subject]);
+        $query->andFilterWhere(['=', 'deal.customer_id', $this->customer_id]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
 
         return $dataProvider;
     }

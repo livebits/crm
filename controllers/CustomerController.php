@@ -226,4 +226,39 @@ class CustomerController extends Controller
 
         return $this->redirect(['index']);
     }
+
+    /*
+     * Ajax actions
+     */
+    public function actionSearchCustomerName($q = null, $id = null)
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $id = intval($id);
+        $out = ['results' => ['id' => '', 'text' => '']];
+        $query = Customer::find()
+            ->select([
+                'id',
+                'firstName',
+                'lastName',
+            ])
+            ->asArray();
+        if (!is_null($q)) {
+            $query
+                ->orWhere(['like', 'CONCAT_WS(" ", firstName , lastName)', $q]);
+
+            $users = $query->all();
+            $results = [];
+            foreach ($users as $row) {
+                $results[] = [
+                    'id' => $row['id'],
+                    'text' => 'نام مشتری' . ' : ' . $row['firstName'] . ' ' . $row['lastName']
+                ];
+            }
+            $out['results'] = array_values($results);
+        } elseif ($id > 0) {
+            $user = $query->where(['id' => $id])->one();
+            $out['results'] = ['id' => $user['id'], 'text' => $user['firstName']];
+        }
+        return $out;
+    }
 }
