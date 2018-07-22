@@ -53,12 +53,13 @@ class DealSearch extends Deal
     public function search($params, $customer_id)
     {
         $query = $this::find()
-            ->select(['deal.*', 'cu.firstName', 'cu.lastName', 'cu.mobile',
+            ->select(['deal.*', 'cu.firstName', 'cu.lastName', 'cu.mobile', 'deal_level.level_name as levelName',
                 'SUM(m.rating) as sum_rating', 'MAX(m.created_at) as latestMeeting',
                 'MAX(m.next_date) as nextMeeting', 'COUNT(m.id) as meetingCount'])
             ->from('deal')
             ->leftJoin('customer as cu', 'cu.id=deal.customer_id')
             ->leftJoin('meeting as m', 'm.deal_id=deal.id')
+            ->leftJoin('deal_level', 'deal_level.id=deal.level')
             ->where('deal.customer_id=' . $customer_id)
             ->groupBy('deal.id');
 

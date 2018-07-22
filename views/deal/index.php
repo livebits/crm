@@ -85,12 +85,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'attribute' => 'level',
                                 'label' => 'مرحله',
                                 'value' => function($model) {
-                                    $arr = [
-                                        "0" => "پیش پرداخت",
-                                        "1" => "پیش نویس",
-                                    ];
-                                    return $arr[$model->level];
-                                }
+
+                                    return$model->levelName;
+                                },
                             ],
                             //'created_at',
                             //'updated_at',

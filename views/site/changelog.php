@@ -31,6 +31,16 @@ $this->title = 'تغییرات';
     <h3 class="well" style="margin-top: 60px;"><?= Html::encode($this->title) ?></h3>
 
     <div class="well">
+
+        <div class="change">
+            <span class="version_number pull-right">V 1.2.1</span>
+            <span class="version_date pull-right">97/4/31</span>
+            <div style="clear: both"></div>
+            <ul class="change-list">
+                <li>رفع باگ در مراحل قرارداد</li>
+            </ul>
+        </div>
+
         <div class="change">
             <span class="version_number pull-right">V 1.2</span>
             <span class="version_date pull-right">97/4/30</span>
