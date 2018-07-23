@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\MeetingSearch */
@@ -29,6 +30,20 @@ if(isset($_GET['deal_id'])){
 
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+<style>
+    .delete-task {
+        color: red;
+        border: 1px solid rgba(135,135,135,0.49);
+        width: 20px;
+        height: 20px;
+        text-align: center;
+        margin-left: -20px;
+    }
+    .delete-task:hover {
+        background-color: #ff605b;
+        color: #ffffff;
+    }
+</style>
 <div class="meeting-index">
 
     <div class="page-title">
@@ -131,6 +146,77 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?php echo $customer->description ?>
                             </div>
 
+                            <div class="more-box-title">وظایف</div>
+                            <div class="more-box">
+
+                                <div class="panel panel-info">
+
+                                    <div class="panel-heading">
+
+                                        <?php $form = ActiveForm::begin([
+                                            'action' => Yii::$app->homeUrl . 'task/add-task',
+                                        ]); ?>
+
+                                        <input type="hidden" name="customer_id" id="customer_id" value="<?=$customer->id?>">
+
+                                        <?php
+                                        if(isset($_GET['deal_id'])) {
+                                            ?>
+                                            <input type="hidden" name="deal_id" value="<?= $_GET['deal_id'] ?>">
+                                            <?php
+                                        }
+                                        ?>
+
+                                        <div class="form-group pull-right" style="width: 200px;">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="task_name" name="task_name" placeholder="وظیفه">
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-success pull-right">ثبت</button>
+                                        <?php ActiveForm::end(); ?>
+
+                                    </div>
+
+                                    <?php $form = ActiveForm::begin([
+                                        'action' => Yii::$app->homeUrl . 'task/save-changes',
+                                    ]); ?>
+
+                                    <input type="hidden" name="customer_id" value="<?=$_GET['customer_id']?>">
+                                    <?php
+                                    if(isset($_GET['deal_id'])) {
+                                        ?>
+                                        <input type="hidden" name="deal_id" value="<?= $_GET['deal_id'] ?>">
+                                        <?php
+                                    }
+                                    ?>
+
+                                    <div class="panel-body">
+
+                                        <?php
+                                        foreach ($tasks as $task){
+                                            ?>
+
+                                            <div class="" style="border: 1px solid rgba(135,135,135,0.49);padding: 5px 5px 5px 25px;margin-bottom: 10px;border-radius: 2px;">
+
+                                                <label class="checkbox-inline" style="margin-right: 0px;margin-left: 10px;">
+                                                    <input type="checkbox" value="<?=isset($task->is_done) ? 1 : 0;?>" <?php if($task->is_done) echo 'checked=""';?> id="task_<?=$task->id?>" name="task[<?=$task->id?>]"><?=$task->name?>
+                                                </label>
+
+                                                <a class="pull-left delete-task" href="<?=Yii::$app->homeUrl?>task/delete-task?id=<?=$task->id?>">x</a>
+                                            </div>
+
+                                            <?php
+                                        }
+                                        ?>
+
+                                    </div>
+                                    <div class="panel-footer">
+                                        <button type="submit" class="btn btn-info btn-block pull-right">اعمال تغییرات</button>
+                                        <?php ActiveForm::end(); ?>
+                                    </div>
+                                </div>
+
+                            </div>
 
                         </div>
                         <div class="col-md-8 doc-left">

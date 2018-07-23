@@ -7,6 +7,7 @@ use app\models\Customer;
 use app\models\Deal;
 use app\models\Media;
 use app\models\MediaFile;
+use app\models\Task;
 use app\models\User;
 use Yii;
 use app\models\Meeting;
@@ -47,11 +48,16 @@ class MeetingController extends Controller
         $searchModel = new MeetingSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $customer_id);
         $customer = Customer::find()->where('id=' . $customer_id)->one();
+        $tasks = Task::find()
+            ->where('customer_id=' . $customer_id)
+            ->orderBy('created_at DESC')
+            ->all();
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'customer' => $customer,
+            'tasks' => $tasks,
         ]);
     }
 
@@ -61,11 +67,16 @@ class MeetingController extends Controller
         $dataProvider = $searchModel->searchForDeals(Yii::$app->request->queryParams, $deal_id);
         $deal = Deal::find()->where('id=' . $deal_id)->one();
         $customer = Customer::find()->where('id=' . $deal->customer_id)->one();
+        $tasks = Task::find()
+            ->where('deal_id=' . $deal_id)
+            ->orderBy('created_at DESC')
+            ->all();
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'customer' => $customer,
+            'tasks' => $tasks,
         ]);
     }
 
