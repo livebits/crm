@@ -13,13 +13,13 @@ nbproject
 Thumbs.db
 
 # composer vendor dir
-!/vendor
+#!/vendor
 
 /vendor/*
-!/vendor/webvimark/
+#!/vendor/webvimark/
 
-/vendor/webvimark/*
-!/vendor/webvimark/module-user-management
+#/vendor/webvimark/*
+#!/vendor/webvimark/module-user-management
 
 /web/media/
 /web/vendors/*
