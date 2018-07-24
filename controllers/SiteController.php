@@ -68,11 +68,38 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $customers = Customer::find()->all();
+        $user = User::getCurrentUser();
+        if(Yii::$app->user->isSuperadmin  || $user::hasRole(['Admin'], $superAdminAllowed = true)) {
+            $customers = Customer::find()->all();
+
+        } else if ($user::hasRole(['manager'])) {
+            $my_users = (new Query())
+                ->select('id')
+                ->from('user')
+                ->where('id=' . Yii::$app->user->id)
+                ->orWhere('parent_id=' . Yii::$app->user->id)
+                ->all();
+
+            $my_users_ids = [];
+            $my_users_ids[0] = Yii::$app->user->id;
+            foreach ($my_users as $my_user) {
+                $my_users_ids[] = $my_user['id'];
+            }
+            $my_users_ids = implode(',', $my_users_ids);
+
+            $customers = Customer::find()
+                ->where('user_id IN (' . $my_users_ids . ')')
+                ->all();
+
+        } else {
+            $customers = Customer::find()
+                ->where('user_id=' . Yii::$app->user->id)
+                ->all();
+        }
+
         $clues_count = $customers_count = $deals_count = $off_customer = $contacts_count = 0;
 
-        $deals_count = Deal::find()->count();
-
+        $my_customer_ids = [];
         foreach ($customers as $customer) {
             if ($customer->status == Customer::$CLUE) {
                 $clues_count++;
@@ -81,25 +108,38 @@ class SiteController extends Controller
             } else if ($customer->status == Customer::$OFF_CUSTOMER) {
                 $off_customer++;
             }
+
+            $my_customer_ids[] = $customer->id;
         }
         $contacts_count = $clues_count + $customers_count + $off_customer;
 
+        $my_customer_ids = implode(",", $my_customer_ids);
+        if($my_customer_ids == ""){
+            $my_customer_ids = "-1";
+        }
+
+        $deals = Deal::find()
+            ->select('id')
+            ->where('customer_id IN (' . $my_customer_ids . ')')
+            ->asArray()
+            ->all();
+
+        $deals_ids = [];
+        foreach ($deals as $deal) {
+            $deals_ids[] = $deal['id'];
+        }
+        $deals_ids = implode(',', $deals_ids);
+        if($deals_ids == "") {
+            $deals_ids = "-1";
+        }
+
+        $deals_count = count($deals);
+
         //check meetings
-//        $customers_meetings = (new Query())
-//            ->select(['meeting.id', 'meeting.user_id', 'SUBSTRING_INDEX(SUBSTRING_INDEX(FROM_UNIXTIME(meeting.next_date), \' \', 1), \' \', -1) AS meeting_date',
-//                'SUBSTRING_INDEX(SUBSTRING_INDEX(FROM_UNIXTIME(m.created_at), \' \', 1), \' \', -1) AS next_meeting_date'])
-//            ->from('meeting')
-//            ->leftJoin('meeting as m', 'm.customer_id=meeting.customer_id')
-//            ->where('meeting.deal_id IS NULL')
-//            ->andWhere('m.deal_id IS NULL')
-//            ->andWhere('meeting.next_date IS NOT NULL')
-//            ->andWhere('m.next_date IS NOT NULL')
-////            ->andWhere('meeting_date = next_meeting_date')
-//            ->groupBy('meeting.id')
-//            ->all();
         $customers_meetings = Meeting::find()
             ->where('deal_id IS NULL')
             ->andWhere('next_date IS NOT NULL')
+            ->andWhere('customer_id IN (' . $my_customer_ids . ')')
             ->orderBy('created_at DESC')
             ->all();
 
@@ -121,6 +161,7 @@ class SiteController extends Controller
         $deals_meetings = Meeting::find()
             ->where('customer_id IS NULL')
             ->andWhere('next_date IS NOT NULL')
+            ->andWhere('deal_id IN (' . $deals_ids . ')')
             ->orderBy('created_at DESC')
             ->all();
 

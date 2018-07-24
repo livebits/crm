@@ -91,11 +91,12 @@ class Customer extends \yii\db\ActiveRecord
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
-            $this->user_id = Yii::$app->user->id;
 
             if($this->isNewRecord) {
                 $this->status = Customer::$CLUE;
                 $this->created_at = time();
+                $this->user_id = Yii::$app->user->id;
+
             } else {
                 $this->updated_at = time();
             }

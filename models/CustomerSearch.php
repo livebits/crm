@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Customer;
+use webvimark\modules\UserManagement\models\User;
 
 /**
  * CustomerSearch represents the model behind the search form of `app\models\Customer`.
@@ -21,6 +22,9 @@ class CustomerSearch extends Customer
     public $sum_rating;
     public $latestMeeting;
     public $nextMeeting;
+
+    public $doneTasks;
+    public $allTasks;
 
     /**
      * {@inheritdoc}
@@ -54,13 +58,22 @@ class CustomerSearch extends Customer
         $query = $this::find()
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
-                'COUNT(cm.id) as meetingCount'])
+                'COUNT(cm.id) as meetingCount',
+                'COUNT(CASE WHEN t.is_done=1 THEN 1 END) as doneTasks',
+                'COUNT(t.id) as allTasks'])
             ->from('customer')
             ->where('status="' . Customer::$CLUE . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
-            ->groupBy('customer.id');
+            ->leftJoin('task as t', 't.customer_id = customer.id')
+            ->groupBy('customer.id, cm.id');
 
         // add conditions that should always apply here
+        $user = User::getCurrentUser();
+        if(!Yii::$app->user->isSuperadmin  || !$user::hasRole(['Admin'])) {
+
+            $customer_ids = \app\models\User::getSubCustomers(true);
+            $query->andWhere('customer.id IN (' . implode(',', $customer_ids) . ')');
+        }
 
 //        $dataProvider = new ActiveDataProvider([
 //            'query' => $query,
@@ -105,13 +118,22 @@ class CustomerSearch extends Customer
         $query = $this::find()
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
-                'COUNT(cm.id) as meetingCount'])
+                'COUNT(cm.id) as meetingCount',
+                'COUNT(CASE WHEN t.is_done=1 THEN 1 END) as doneTasks',
+                'COUNT(t.id) as allTasks'])
 //            ->from('customer')
             ->where('status="' . Customer::$OFF_CUSTOMER . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
-            ->groupBy('customer.id');
+            ->leftJoin('task as t', 't.customer_id = customer.id')
+            ->groupBy('customer.id, cm.id');
 
         // add conditions that should always apply here
+        $user = User::getCurrentUser();
+        if(!Yii::$app->user->isSuperadmin  || !$user::hasRole(['Admin'])) {
+
+            $customer_ids = \app\models\User::getSubCustomers(true);
+            $query->andWhere('customer.id IN (' . implode(',', $customer_ids) . ')');
+        }
 
 //        $dataProvider = new ActiveDataProvider([
 //            'query' => $query,
@@ -155,15 +177,24 @@ class CustomerSearch extends Customer
         $query = $this::find()
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
-                'COUNT(cm.id) as meetingCount'])
+                'COUNT(cm.id) as meetingCount',
+                'COUNT(CASE WHEN t.is_done=1 THEN 1 END) as doneTasks',
+                'COUNT(t.id) as allTasks'])
 //            ->from('customer')
             ->where('status="' . Customer::$CLUE . '"')
             ->orWhere('status="' . Customer::$CUSTOMER . '"')
             ->orWhere('status="' . Customer::$OFF_CUSTOMER . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
-            ->groupBy('customer.id');
+            ->leftJoin('task as t', 't.customer_id = customer.id')
+            ->groupBy('customer.id, cm.id');
 
         // add conditions that should always apply here
+        $user = User::getCurrentUser();
+        if(!Yii::$app->user->isSuperadmin  || !$user::hasRole(['Admin'])) {
+
+            $customer_ids = \app\models\User::getSubCustomers(true);
+            $query->andWhere('customer.id IN (' . implode(',', $customer_ids) . ')');
+        }
 
 //        $dataProvider = new ActiveDataProvider([
 //            'query' => $query,
@@ -207,13 +238,22 @@ class CustomerSearch extends Customer
         $query = $this::find()
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
-                'COUNT(cm.id) as meetingCount'])
+                'COUNT(cm.id) as meetingCount',
+                'COUNT(CASE WHEN t.is_done=1 THEN 1 END) as doneTasks',
+                'COUNT(t.id) as allTasks'])
 //            ->from('customer')
             ->where('status="' . Customer::$CUSTOMER . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
-            ->groupBy('customer.id');
+            ->leftJoin('task as t', 't.customer_id = customer.id')
+            ->groupBy('customer.id, cm.id');
 
         // add conditions that should always apply here
+        $user = User::getCurrentUser();
+        if(!Yii::$app->user->isSuperadmin  || !$user::hasRole(['Admin'])) {
+
+            $customer_ids = \app\models\User::getSubCustomers(true);
+            $query->andWhere('customer.id IN (' . implode(',', $customer_ids) . ')');
+        }
 
 //        $dataProvider = new ActiveDataProvider([
 //            'query' => $query,

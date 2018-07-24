@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Meeting;
+use webvimark\modules\UserManagement\models\User;
 
 /**
  * MeetingSearch represents the model behind the search form of `app\models\Meeting`.
@@ -103,8 +104,13 @@ class MeetingSearch extends Meeting
             ->groupBy('meeting.id')
             ->orderBy('meeting.id DESC');
 
-//        var_export($query->all());die();
         // add conditions that should always apply here
+        $user = User::getCurrentUser();
+        if(!Yii::$app->user->isSuperadmin  || !$user::hasRole(['Admin'])) {
+
+            $customer_ids = \app\models\User::getSubCustomers(true);
+            $query->andWhere('customer.id IN (' . implode(',', $customer_ids) . ')');
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -150,8 +156,13 @@ class MeetingSearch extends Meeting
             ->groupBy('meeting.id')
             ->orderBy('meeting.id DESC');
 
-//        var_export($query->all());die();
         // add conditions that should always apply here
+        $user = User::getCurrentUser();
+        if(!Yii::$app->user->isSuperadmin  || !$user::hasRole(['Admin'])) {
+
+            $customer_ids = \app\models\User::getSubCustomers(true);
+            $query->andWhere('customer.id IN (' . implode(',', $customer_ids) . ')');
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

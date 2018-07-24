@@ -88,8 +88,15 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'label' => 'مرحله',
                                 'value' => function($model) {
 
-                                    return$model->levelName;
+                                    return $model->levelName;
                                 },
+                            ],
+                            [
+                                'format' => 'raw',
+                                'label' => 'وظایف',
+                                'value' => function($model) {
+                                    return $model->doneTasks . "/" . $model->allTasks;
+                                }
                             ],
                             //'created_at',
                             //'updated_at',

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\Query;
 
 class User extends \yii\base\Object implements \yii\web\IdentityInterface
 {
@@ -177,5 +178,50 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
             return true;
         }
         return false;
+    }
+
+    public static function getSubCustomers($return_ids = false) {
+        $user = \webvimark\modules\UserManagement\models\User::getCurrentUser();
+        if(Yii::$app->user->isSuperadmin  || $user::hasRole(['Admin'], $superAdminAllowed = true)) {
+            $customers = Customer::find()->all();
+
+        } else if ($user::hasRole(['manager'])) {
+            $my_users = (new Query())
+                ->select('id')
+                ->from('user')
+                ->where('id=' . Yii::$app->user->id)
+                ->orWhere('parent_id=' . Yii::$app->user->id)
+                ->all();
+
+            $my_users_ids = [];
+            $my_users_ids[0] = Yii::$app->user->id;
+            foreach ($my_users as $my_user) {
+                $my_users_ids[] = $my_user['id'];
+            }
+            $my_users_ids = implode(',', $my_users_ids);
+
+            $customers = Customer::find()
+                ->where('user_id IN (' . $my_users_ids . ')')
+                ->all();
+
+        } else {
+            $customers = Customer::find()
+                ->where('user_id=' . Yii::$app->user->id)
+                ->all();
+        }
+
+        if(!$return_ids) {
+            return $customers;
+
+        } else {
+            $customers_ids = [];
+            $customers_ids[0] = '-1';
+
+            foreach ($customers as $customer) {
+                $customers_ids[] = $customer->id;
+            }
+
+            return $customers_ids;
+        }
     }
 }

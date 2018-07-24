@@ -12,7 +12,10 @@ use app\widgets\jDateTimePicker\JDTPicker;
 <div class="deal-form">
 
     <?php
-        $customer = \app\models\Customer::find($_GET['customer_id'])->one();
+        $customer = \app\models\Customer::find()
+        ->where('id=' . $_GET['customer_id'])->one();
+
+        $levels = $model->get_all_deal_levels();
     ?>
 
     <?php $form = ActiveForm::begin(); ?>
@@ -27,10 +30,7 @@ use app\widgets\jDateTimePicker\JDTPicker;
     <?= $form->field($model, 'price')->textInput() ?>
 
     <?= $form->field($model, 'level')->dropDownList(
-        [
-            "0" => "پیش پرداخت",
-            "1" => "پیش نویس",
-        ]
+        $levels
     );
     ?>
 

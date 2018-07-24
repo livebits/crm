@@ -91,6 +91,13 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'label' => 'قیمت قرارداد'
                             ],
                             [
+                                'format' => 'raw',
+                                'label' => 'وظایف',
+                                'value' => function($model) {
+                                    return $model->doneTasks . "/" . $model->allTasks;
+                                }
+                            ],
+                            [
                                 'class' => 'yii\grid\ActionColumn',
                                 'template' => '{view} {update} {delete} {meeting} {deal}',
                                 'header' => 'عملیات',

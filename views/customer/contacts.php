@@ -100,6 +100,13 @@ $this->params['breadcrumbs'][] = $this->title;
                                     }
                                 }
                             ],
+                            [
+                                'format' => 'raw',
+                                'label' => 'وظایف',
+                                'value' => function($model) {
+                                    return $model->doneTasks . "/" . $model->allTasks;
+                                }
+                            ],
 //                            'companyName',
                             //'position',
                             //'mobile',
