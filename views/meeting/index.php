@@ -181,7 +181,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'action' => Yii::$app->homeUrl . 'task/save-changes',
                                     ]); ?>
 
-                                    <input type="hidden" name="customer_id" value="<?=$_GET['customer_id']?>">
+                                    <input type="hidden" name="customer_id" value="<?= $customer->id?>">
                                     <?php
                                     if(isset($_GET['deal_id'])) {
                                         ?>

@@ -38,6 +38,7 @@ $this->title = 'تغییرات';
             <div style="clear: both"></div>
             <ul class="change-list">
                 <li>رفع باگ تاریخ در لیست مشتریان و معاملات</li>
+                <li>رفع باگ لیست جلسات معاملات</li>
             </ul>
         </div>
 

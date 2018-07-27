@@ -119,7 +119,7 @@ class CustomerSearch extends Customer
 //            ->from('customer')
             ->where('status="' . Customer::$OFF_CUSTOMER . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
-            ->groupBy('customer.id, cm.id');
+            ->groupBy('customer.id');
 
         // add conditions that should always apply here
         $user = User::getCurrentUser();
@@ -177,7 +177,7 @@ class CustomerSearch extends Customer
             ->orWhere('status="' . Customer::$CUSTOMER . '"')
             ->orWhere('status="' . Customer::$OFF_CUSTOMER . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
-            ->groupBy('customer.id, cm.id');
+            ->groupBy('customer.id');
 
         // add conditions that should always apply here
         $user = User::getCurrentUser();
@@ -233,7 +233,7 @@ class CustomerSearch extends Customer
 //            ->from('customer')
             ->where('status="' . Customer::$CUSTOMER . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
-            ->groupBy('customer.id, cm.id');
+            ->groupBy('customer.id');
 
         // add conditions that should always apply here
         $user = User::getCurrentUser();
