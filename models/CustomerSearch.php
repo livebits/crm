@@ -58,14 +58,11 @@ class CustomerSearch extends Customer
         $query = $this::find()
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
-                'COUNT(cm.id) as meetingCount',
-                'COUNT(CASE WHEN t.is_done=1 THEN 1 END) as doneTasks',
-                'COUNT(t.id) as allTasks'])
+                'COUNT(cm.id) as meetingCount'])
             ->from('customer')
             ->where('status="' . Customer::$CLUE . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
-            ->leftJoin('task as t', 't.customer_id = customer.id')
-            ->groupBy('customer.id, cm.id');
+            ->groupBy('customer.id');
 
         // add conditions that should always apply here
         $user = User::getCurrentUser();
@@ -118,13 +115,10 @@ class CustomerSearch extends Customer
         $query = $this::find()
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
-                'COUNT(cm.id) as meetingCount',
-                'COUNT(CASE WHEN t.is_done=1 THEN 1 END) as doneTasks',
-                'COUNT(t.id) as allTasks'])
+                'COUNT(cm.id) as meetingCount'])
 //            ->from('customer')
             ->where('status="' . Customer::$OFF_CUSTOMER . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
-            ->leftJoin('task as t', 't.customer_id = customer.id')
             ->groupBy('customer.id, cm.id');
 
         // add conditions that should always apply here
@@ -177,15 +171,12 @@ class CustomerSearch extends Customer
         $query = $this::find()
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
-                'COUNT(cm.id) as meetingCount',
-                'COUNT(CASE WHEN t.is_done=1 THEN 1 END) as doneTasks',
-                'COUNT(t.id) as allTasks'])
+                'COUNT(cm.id) as meetingCount'])
 //            ->from('customer')
             ->where('status="' . Customer::$CLUE . '"')
             ->orWhere('status="' . Customer::$CUSTOMER . '"')
             ->orWhere('status="' . Customer::$OFF_CUSTOMER . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
-            ->leftJoin('task as t', 't.customer_id = customer.id')
             ->groupBy('customer.id, cm.id');
 
         // add conditions that should always apply here
@@ -238,13 +229,10 @@ class CustomerSearch extends Customer
         $query = $this::find()
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
-                'COUNT(cm.id) as meetingCount',
-                'COUNT(CASE WHEN t.is_done=1 THEN 1 END) as doneTasks',
-                'COUNT(t.id) as allTasks'])
+                'COUNT(cm.id) as meetingCount'])
 //            ->from('customer')
             ->where('status="' . Customer::$CUSTOMER . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
-            ->leftJoin('task as t', 't.customer_id = customer.id')
             ->groupBy('customer.id, cm.id');
 
         // add conditions that should always apply here

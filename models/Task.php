@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\Query;
 
 /**
  * This is the model class for table "task".
@@ -54,5 +55,29 @@ class Task extends \yii\db\ActiveRecord
             'expired_at' => 'Expired At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public static function getCustomerTasksStatus($customer_id) {
+        $query = (new Query())
+            ->select([
+                'COUNT(CASE WHEN t.is_done=1 THEN 1 END) as doneTasks',
+                'COUNT(t.id) as allTasks'])
+            ->from('task as t')
+            ->where('customer_id="' . $customer_id . '"')
+            ->all();
+
+        return  $query[0]['allTasks'] . ' / ' . $query[0]['doneTasks'];
+    }
+
+    public static function getDealTasksStatus($deal_id) {
+        $query = (new Query())
+            ->select([
+                'COUNT(CASE WHEN t.is_done=1 THEN 1 END) as doneTasks',
+                'COUNT(t.id) as allTasks'])
+            ->from('task as t')
+            ->where('deal_id="' . $deal_id . '"')
+            ->all();
+
+        return  $query[0]['allTasks'] . ' / ' . $query[0]['doneTasks'];
     }
 }

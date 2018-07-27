@@ -59,16 +59,13 @@ class DealSearch extends Deal
         $query = $this::find()
             ->select(['deal.*', 'cu.firstName', 'cu.lastName', 'cu.mobile', 'deal_level.level_name as levelName',
                 'SUM(m.rating) as sum_rating', 'MAX(m.created_at) as latestMeeting',
-                'MAX(m.next_date) as nextMeeting', 'COUNT(m.id) as meetingCount',
-                'COUNT(CASE WHEN t.is_done=1 THEN 1 END) as doneTasks',
-                'COUNT(t.id) as allTasks'])
+                'MAX(m.next_date) as nextMeeting', 'COUNT(m.id) as meetingCount'])
             ->from('deal')
             ->leftJoin('customer as cu', 'cu.id=deal.customer_id')
             ->leftJoin('meeting as m', 'm.deal_id=deal.id')
             ->leftJoin('deal_level', 'deal_level.id=deal.level')
-            ->leftJoin('task as t', 't.deal_id = deal.id')
             ->where('deal.customer_id=' . $customer_id)
-            ->groupBy('deal.id, m.id');
+            ->groupBy('deal.id');
 
         // add conditions that should always apply here
         $user = User::getCurrentUser();
@@ -113,15 +110,12 @@ class DealSearch extends Deal
         $query = $this::find()
             ->select(['deal.*', 'cu.id as customerName', 'cu.firstName', 'cu.lastName', 'cu.mobile', 'deal_level.level_name as levelName',
                 'SUM(m.rating) as sum_rating', 'MAX(m.created_at) as latestMeeting',
-                'MAX(m.next_date) as nextMeeting', 'COUNT(m.id) as meetingCount',
-                'COUNT(CASE WHEN t.is_done=1 THEN 1 END) as doneTasks',
-                'COUNT(t.id) as allTasks'])
+                'MAX(m.next_date) as nextMeeting', 'COUNT(m.id) as meetingCount'])
             ->from('deal')
             ->leftJoin('customer as cu', 'cu.id=deal.customer_id')
             ->leftJoin('meeting as m', 'm.deal_id=deal.id')
             ->leftJoin('deal_level', 'deal_level.id=deal.level')
-            ->leftJoin('task as t', 't.deal_id = deal.id')
-            ->groupBy('deal.id, m.id');
+            ->groupBy('deal.id');
 
         // add conditions that should always apply here
         $user = User::getCurrentUser();
