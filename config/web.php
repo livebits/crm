@@ -39,7 +39,10 @@ $config = [
                     $event->action->controller->layout = 'loginLayout.php';
                 };
             },
-        ]
+        ],
+        'api' => [
+            'class' => 'app\modules\api\Module',
+        ],
     ],
     'components' => [
         'request' => [
