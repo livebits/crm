@@ -33,6 +33,24 @@ $this->title = 'تغییرات';
     <div class="well">
 
         <div class="change">
+            <span class="version_number pull-right">V 2.0.0</span>
+            <span class="version_date pull-right">97/5/10</span>
+            <div style="clear: both"></div>
+            <ul class="change-list">
+                <li>افزودن وب سرویس های مشتریان و معاملات و مدیریت جلسات</li>
+            </ul>
+        </div>
+
+        <div class="change">
+            <span class="version_number pull-right">V 1.4.6</span>
+            <span class="version_date pull-right">97/5/7</span>
+            <div style="clear: both"></div>
+            <ul class="change-list">
+                <li>رفع باگ مشاهده جزییات جلسه</li>
+            </ul>
+        </div>
+
+        <div class="change">
             <span class="version_number pull-right">V 1.4.5</span>
             <span class="version_date pull-right">97/5/5</span>
             <div style="clear: both"></div>

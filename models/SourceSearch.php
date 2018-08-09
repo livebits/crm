@@ -39,7 +39,7 @@ class SourceSearch extends Source
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $getQuery = false)
     {
         $query = Source::find();
 
@@ -66,6 +66,10 @@ class SourceSearch extends Source
 
         $query->andFilterWhere(['like', 'name', $this->name]);
 
-        return $dataProvider;
+        if ($getQuery) {
+            return $query;
+        } else {
+            return $dataProvider;
+        }
     }
 }

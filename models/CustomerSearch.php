@@ -53,7 +53,7 @@ class CustomerSearch extends Customer
      *
      * @return ActiveDataProvider
      */
-    public function searchClues($params)
+    public function searchClues($params, $getQuery = false)
     {
         $query = $this::find()
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
@@ -107,10 +107,14 @@ class CustomerSearch extends Customer
             'query' => $query,
         ]);
 
-        return $dataProvider;
+        if($getQuery) {
+            return $query;
+        } else {
+            return $dataProvider;
+        }
     }
 
-    public function searchOffCustomers($params)
+    public function searchOffCustomers($params, $getQuery = false)
     {
         $query = $this::find()
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
@@ -163,10 +167,14 @@ class CustomerSearch extends Customer
             'query' => $query,
         ]);
 
-        return $dataProvider;
+        if($getQuery) {
+            return $query;
+        } else {
+            return $dataProvider;
+        }
     }
 
-    public function searchContacts($params)
+    public function searchContacts($params, $getQuery = false)
     {
         $query = $this::find()
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
@@ -221,10 +229,14 @@ class CustomerSearch extends Customer
             'query' => $query,
         ]);
 
-        return $dataProvider;
+        if($getQuery) {
+            return $query;
+        } else {
+            return $dataProvider;
+        }
     }
 
-    public function searchCustomers($params)
+    public function searchCustomers($params, $getQuery = false)
     {
         $query = $this::find()
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
@@ -277,10 +289,14 @@ class CustomerSearch extends Customer
             'query' => $query,
         ]);
 
-        return $dataProvider;
+        if($getQuery) {
+            return $query;
+        } else {
+            return $dataProvider;
+        }
     }
 
-    public function searchDeals($params)
+    public function searchDeals($params, $getQuery = false)
     {
         $query = $this::find()
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
@@ -327,6 +343,10 @@ class CustomerSearch extends Customer
             'query' => $query,
         ]);
 
-        return $dataProvider;
+        if($getQuery) {
+            return $query;
+        } else {
+            return $dataProvider;
+        }
     }
 }

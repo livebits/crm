@@ -93,6 +93,7 @@ class TaskController extends Controller
 
         $model->name = $name;
         $model->created_at = time();
+        $model->is_done = 0;
         $model->save(false);
 
         return $this->redirect(Yii::$app->request->referrer);

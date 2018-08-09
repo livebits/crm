@@ -39,7 +39,7 @@ class DealLevelSearch extends DealLevel
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $getQuery = false)
     {
         $query = DealLevel::find()->orderBy('level_number ASC');
 
@@ -67,6 +67,10 @@ class DealLevelSearch extends DealLevel
 
         $query->andFilterWhere(['like', 'level_name', $this->level_name]);
 
-        return $dataProvider;
+        if ($getQuery) {
+            return $query;
+        } else {
+            return $dataProvider;
+        }
     }
 }

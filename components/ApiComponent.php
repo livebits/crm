@@ -14,33 +14,48 @@ class ApiComponent extends Component
      */
     public static function errorResponse($errors = [], $code) {
         $result = [];
+
+        $errors_data = [];
         foreach ($errors as $error) {
-            $result['errors'][] = $error;
+            $errors_data[] = $error;
         }
 
+        $result['data'] = $errors_data;
         $result['message'] = self::_getStatusCodeMessage($code);
-        $result['message'] = self::_getStatusCodeMessage($code);
+        $result['code'] = 0;
+        $result['status'] = $code;
 
-        Yii::$app->response->statusCode = $code;
+        Yii::$app->response->statusCode = 400;
         Yii::$app->response->format = Response::FORMAT_JSON;
 
-        echo json_encode($result);
-        Yii::$app->end();
+        return $result;
     }
 
     /**
      *
      */
-    public static function successResponse($message = '', $data = []) {
+    public static function successResponse($message = '', $data = [], $isArray = false) {
         $result = [];
-        $result['data'] = $data;
+        if($isArray) {
+            $result['data'] = $data;
+        } else {
+            $result['data'][] = $data;
+        }
         $result['message'] = $message;
+        $result['code'] = 1;
+        $result['status'] = 200;
 
         Yii::$app->response->statusCode = 200;
         Yii::$app->response->format = Response::FORMAT_JSON;
 
-        echo json_encode($result);
-        Yii::$app->end();
+        return $result;
+    }
+
+    public static function parseInputData() {
+        $json = file_get_contents('php://input');
+        $req = json_decode($json, true);
+
+        return $req;
     }
 
     private static function _getStatusCodeMessage($status)
@@ -89,7 +104,11 @@ class ApiComponent extends Component
             502 => 'Bad Gateway',
             503 => 'Service Unavailable',
             504 => 'Gateway Timeout',
-            505 => 'HTTP Version Not Supported'
+            505 => 'HTTP Version Not Supported',
+
+            1000 => 'Enter required data',
+            1001 => 'Username or password is incorrect',
+            1002 => 'Item not found',
         );
 
         return (isset($codes[$status])) ? $codes[$status] : '';

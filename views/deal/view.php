@@ -66,11 +66,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             [
                                 "attribute" => 'level',
                                 "value" => function($model) {
-                                    $arr = [
-                                        "0" => "پیش پرداخت",
-                                        "1" => "پیش نویس",
-                                    ];
-                                    return $arr[$model->level];
+                                    $level = \app\models\DealLevel::find()
+                                        ->select('level_name')
+                                        ->where('id='.$model->level)
+                                        ->one();
+                                    return $level->level_name;
                                 }
                             ],
                             [

@@ -20,6 +20,7 @@ class MeetingSearch extends Meeting
     public $customer_code;
     public $customer_name;
     public $deal_subject;
+
     /**
      * {@inheritdoc}
      */
@@ -47,14 +48,14 @@ class MeetingSearch extends Meeting
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $customer_id = null)
+    public function search($params, $customer_id = null, $getQuery = false)
     {
         $query = $this::find()
             ->select(['user.username', 'meeting.*'
                 , 'COUNT(CASE WHEN media.type="' . Media::$IMAGE . '" THEN 1 END) as imagesCount'
                 , 'COUNT(CASE WHEN media.type="' . Media::$AUDIO . '" THEN 1 END) as audiosCount'
                 , 'COUNT(CASE WHEN media.type="' . Media::$OTHER . '" THEN 1 END) as attachsCount'
-                    ])
+            ])
             ->from('meeting')
             ->leftJoin('user', 'user.id=meeting.user_id')
             ->leftJoin('media', 'media.meeting_id=meeting.id')
@@ -87,7 +88,11 @@ class MeetingSearch extends Meeting
 
         $query->andFilterWhere(['like', 'content', $this->content]);
 
-        return $dataProvider;
+        if ($getQuery) {
+            return $query;
+        } else {
+            return $dataProvider;
+        }
     }
 
     public function searchCustomersLates($params, $lateMeetingsIds)
@@ -95,18 +100,18 @@ class MeetingSearch extends Meeting
         $query = $this::find()
             ->select(['user.username', 'meeting.*', 'customer.id as customer_code',
                 'CONCAT(customer.firstName, " ", customer.lastName) as customer_name'
-                    ])
+            ])
             ->from('meeting')
             ->leftJoin('user', 'user.id=meeting.user_id')
             ->leftJoin('customer', 'customer.id=meeting.customer_id')
             ->leftJoin('media', 'media.meeting_id=meeting.id')
-            ->where('meeting.id IN ('.$lateMeetingsIds.')')
+            ->where('meeting.id IN (' . $lateMeetingsIds . ')')
             ->groupBy('meeting.id')
             ->orderBy('meeting.id DESC');
 
         // add conditions that should always apply here
         $user = User::getCurrentUser();
-        if(!Yii::$app->user->isSuperadmin  || !$user::hasRole(['Admin'])) {
+        if (!Yii::$app->user->isSuperadmin || !$user::hasRole(['Admin'])) {
 
             $customer_ids = \app\models\User::getSubCustomers(true);
             $query->andWhere('customer.id IN (' . implode(',', $customer_ids) . ')');
@@ -146,19 +151,19 @@ class MeetingSearch extends Meeting
             ->select(['user.username', 'meeting.*', 'customer.id as customer_code',
                 'CONCAT(customer.firstName, " ", customer.lastName) as customer_name',
                 'deal.subject as deal_subject'
-                    ])
+            ])
             ->from('meeting')
             ->leftJoin('user', 'user.id=meeting.user_id')
             ->leftJoin('deal', 'deal.id=meeting.deal_id')
             ->leftJoin('customer', 'customer.id=deal.customer_id')
             ->leftJoin('media', 'media.meeting_id=meeting.id')
-            ->where('meeting.id IN ('.$lateMeetingsIds.')')
+            ->where('meeting.id IN (' . $lateMeetingsIds . ')')
             ->groupBy('meeting.id')
             ->orderBy('meeting.id DESC');
 
         // add conditions that should always apply here
         $user = User::getCurrentUser();
-        if(!Yii::$app->user->isSuperadmin  || !$user::hasRole(['Admin'])) {
+        if (!Yii::$app->user->isSuperadmin || !$user::hasRole(['Admin'])) {
 
             $customer_ids = \app\models\User::getSubCustomers(true);
             $query->andWhere('customer.id IN (' . implode(',', $customer_ids) . ')');
@@ -192,7 +197,7 @@ class MeetingSearch extends Meeting
         return $dataProvider;
     }
 
-    public function searchForDeals($params, $deal_id = null)
+    public function searchForDeals($params, $deal_id = null, $getQuery = false)
     {
         $query = $this::find()
             ->select(['user.username', 'meeting.*'
@@ -232,6 +237,10 @@ class MeetingSearch extends Meeting
 
         $query->andFilterWhere(['like', 'content', $this->content]);
 
-        return $dataProvider;
+        if ($getQuery) {
+            return $query;
+        } else {
+            return $dataProvider;
+        }
     }
 }

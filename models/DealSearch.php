@@ -54,7 +54,7 @@ class DealSearch extends Deal
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $customer_id)
+    public function search($params, $customer_id, $getQuery = false)
     {
         $query = $this::find()
             ->select(['deal.*', 'cu.firstName', 'cu.lastName', 'cu.mobile', 'deal_level.level_name as levelName',
@@ -102,10 +102,16 @@ class DealSearch extends Deal
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
-        return $dataProvider;
+
+        if($getQuery) {
+            return $query;
+
+        } else {
+            return $dataProvider;
+        }
     }
 
-    public function searchAll($params)
+    public function searchAll($params, $getQuery = false)
     {
         $query = $this::find()
             ->select(['deal.*', 'cu.id as customerName', 'cu.firstName', 'cu.lastName', 'cu.mobile', 'deal_level.level_name as levelName',
@@ -150,6 +156,11 @@ class DealSearch extends Deal
             'query' => $query,
         ]);
 
-        return $dataProvider;
+        if($getQuery) {
+            return $query;
+
+        } else {
+            return $dataProvider;
+        }
     }
 }
