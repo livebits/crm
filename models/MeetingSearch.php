@@ -106,6 +106,7 @@ class MeetingSearch extends Meeting
             ->leftJoin('customer', 'customer.id=meeting.customer_id')
             ->leftJoin('media', 'media.meeting_id=meeting.id')
             ->where('meeting.id IN (' . $lateMeetingsIds . ')')
+            ->andWhere('customer.status != ' . Customer::$OFF_CUSTOMER)
             ->groupBy('meeting.id')
             ->orderBy('meeting.id DESC');
 
