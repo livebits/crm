@@ -137,9 +137,11 @@ class SiteController extends Controller
 
         //check meetings
         $customers_meetings = Meeting::find()
+            ->leftJoin('customer', 'customer.id=meeting.customer_id')
             ->where('deal_id IS NULL')
             ->andWhere('next_date IS NOT NULL')
             ->andWhere('customer_id IN (' . $my_customer_ids . ')')
+            ->andWhere('customer.status != ' . Customer::$OFF_CUSTOMER)
             ->orderBy('created_at DESC')
             ->all();
 

@@ -83,8 +83,10 @@ class MeetingController extends Controller
     public function actionLateCustomers() {
 
         $customers_meetings = Meeting::find()
+            ->leftJoin('customer', 'customer.id=meeting.customer_id')
             ->where('deal_id IS NULL')
             ->andWhere('next_date IS NOT NULL')
+            ->andWhere('customer.status != ' . Customer::$OFF_CUSTOMER)
             ->orderBy('created_at DESC')
             ->all();
 
