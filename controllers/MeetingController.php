@@ -91,6 +91,7 @@ class MeetingController extends Controller
             ->all();
 
         $lateMeetingsIds = [];
+        $lateMeetingsIds[] = -1;
         $customer_ids = [];
         foreach ($customers_meetings as $customers_meeting) {
 
@@ -125,6 +126,7 @@ class MeetingController extends Controller
             ->all();
 
         $lateMeetingsIds = [];
+        $lateMeetingsIds[] = -1;
         $deal_ids = [];
         foreach ($deals_meetings as $deals_meeting) {
 
