@@ -565,4 +565,129 @@ class SiteController extends Controller
     public function actionChangelog() {
         return $this->render('changelog');
     }
+
+    /*****************************************
+     * customer actions
+     * ***************************************
+     */
+
+    public function actionCustomerDashboard() {
+
+        $user = User::getCurrentUser();
+        if(Yii::$app->user->isSuperadmin  || $user::hasRole(['Admin'], $superAdminAllowed = true)) {
+            $customers = Customer::find()->all();
+
+        } else if ($user::hasRole(['manager'])) {
+            $my_users = (new Query())
+                ->select('id')
+                ->from('user')
+                ->where('id=' . Yii::$app->user->id)
+                ->orWhere('parent_id=' . Yii::$app->user->id)
+                ->all();
+
+            $my_users_ids = [];
+            $my_users_ids[0] = Yii::$app->user->id;
+            foreach ($my_users as $my_user) {
+                $my_users_ids[] = $my_user['id'];
+            }
+            $my_users_ids = implode(',', $my_users_ids);
+
+            $customers = Customer::find()
+                ->where('user_id IN (' . $my_users_ids . ')')
+                ->all();
+
+        } else {
+            $customers = Customer::find()
+                ->where('user_id=' . Yii::$app->user->id)
+                ->all();
+        }
+
+        $clues_count = $customers_count = $deals_count = $off_customer = $contacts_count = 0;
+
+        $my_customer_ids = [];
+        foreach ($customers as $customer) {
+            if ($customer->status == Customer::$CLUE) {
+                $clues_count++;
+            } else if ($customer->status == Customer::$CUSTOMER) {
+                $customers_count++;
+            } else if ($customer->status == Customer::$OFF_CUSTOMER) {
+                $off_customer++;
+            }
+
+            $my_customer_ids[] = $customer->id;
+        }
+        $contacts_count = $clues_count + $customers_count + $off_customer;
+
+        $my_customer_ids = implode(",", $my_customer_ids);
+        if($my_customer_ids == ""){
+            $my_customer_ids = "-1";
+        }
+
+        $deals = Deal::find()
+            ->select('id')
+            ->where('customer_id IN (' . $my_customer_ids . ')')
+            ->asArray()
+            ->all();
+
+        $deals_ids = [];
+        foreach ($deals as $deal) {
+            $deals_ids[] = $deal['id'];
+        }
+        $deals_ids = implode(',', $deals_ids);
+        if($deals_ids == "") {
+            $deals_ids = "-1";
+        }
+
+        $deals_count = count($deals);
+
+        //check meetings
+        $customers_meetings = Meeting::find()
+            ->leftJoin('customer', 'customer.id=meeting.customer_id')
+            ->where('deal_id IS NULL')
+            ->andWhere('next_date IS NOT NULL')
+            ->andWhere('customer_id IN (' . $my_customer_ids . ')')
+            ->andWhere('customer.status != ' . Customer::$OFF_CUSTOMER)
+            ->orderBy('created_at DESC')
+            ->all();
+
+        $lateCustomerMeetingsCount = 0;
+        $customer_ids = [];
+        foreach ($customers_meetings as $customers_meeting) {
+
+            if (in_array($customers_meeting->customer_id, $customer_ids)) {
+                continue;
+            }
+
+            $customer_ids[] = $customers_meeting->customer_id;
+            if(date('Y-m-d', $customers_meeting->next_date) < date('Y-m-d', time())){
+
+                $lateCustomerMeetingsCount++;
+            }
+        }
+
+        $deals_meetings = Meeting::find()
+            ->where('customer_id IS NULL')
+            ->andWhere('next_date IS NOT NULL')
+            ->andWhere('deal_id IN (' . $deals_ids . ')')
+            ->orderBy('created_at DESC')
+            ->all();
+
+        $lateDealMeetingsCount = 0;
+        $deal_ids = [];
+        foreach ($deals_meetings as $deals_meeting) {
+
+            if (in_array($deals_meeting->deal_id, $deal_ids)) {
+                continue;
+            }
+
+            $deal_ids[] = $deals_meeting->deal_id;
+            if(date('Y-m-d', $deals_meeting->next_date) < date('Y-m-d', time())){
+
+                $lateDealMeetingsCount++;
+            }
+        }
+
+
+        return $this->render('customer-dashboard', compact('clues_count', 'customers_count', 'deals_count', 'contacts_count', 'off_customer', 'lateCustomerMeetingsCount', 'lateDealMeetingsCount'));
+    }
 }

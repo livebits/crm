@@ -44,19 +44,22 @@ AppAsset::register($this);
                     <div class="profile_pic">
                         <a href="<?=Yii::$app->homeUrl?>site/profile">
                             <?php
-                            $userProfile = \app\models\UserProfile::find()
-                                ->where('user_id=' . Yii::$app->user->id)
-                                ->one();
+                            if(!Yii::$app->user->isGuest) {
+                                $userProfile = \app\models\UserProfile::find()
+                                    ->where('user_id=' . Yii::$app->user->id)
+                                    ->one();
 
-                            if($userProfile && $userProfile->image != "") {
-                                ?>
-                                <img src="<?=Yii::$app->homeUrl?>Uploads/<?=$userProfile->image?>" alt="..." class="img-circle profile_img">
-                                <?php
-                            } else {
-                                ?>
-                                <img src="<?= Yii::$app->homeUrl ?>images/no_image.png" alt="..."
-                                     class="img-circle profile_img">
-                                <?php
+                                if ($userProfile && $userProfile->image != "") {
+                                    ?>
+                                    <img src="<?= Yii::$app->homeUrl ?>Uploads/<?= $userProfile->image ?>" alt="..."
+                                         class="img-circle profile_img">
+                                    <?php
+                                } else {
+                                    ?>
+                                    <img src="<?= Yii::$app->homeUrl ?>images/no_image.png" alt="..."
+                                         class="img-circle profile_img">
+                                    <?php
+                                }
                             }
                             ?>
                         </a>
@@ -64,7 +67,7 @@ AppAsset::register($this);
                     <div class="profile_info">
                         <h2><?=Yii::$app->user->username?></h2>
                         <?php
-                        if($userProfile && $userProfile->firstName != "") {
+                        if(!Yii::$app->user->isGuest && $userProfile && $userProfile->firstName != "") {
                             ?>
                             <span><?php echo $userProfile->firstName . ' ' . $userProfile->lastName; ?> </span>
                             <?php
@@ -140,7 +143,7 @@ AppAsset::register($this);
                             <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown"
                                aria-expanded="false">
                                 <?php
-                                if($userProfile && $userProfile->image != "") {
+                                if(!Yii::$app->user->isGuest && $userProfile && $userProfile->image != "") {
                                     ?>
                                     <img src="<?=Yii::$app->homeUrl?>Uploads/<?=$userProfile->image?>">
                                     <?php

@@ -401,7 +401,7 @@ class MeetingController extends Controller
             Media::deleteAll(['id' => $media_id]);
         }
 
-        $files = FileHelper::findFiles($directory);
+        $files = FileHelper::findFiles($_SERVER["DOCUMENT_ROOT"] . $directory . '/');
         $output = [];
         foreach ($files as $file) {
             $fileName = basename($file);
