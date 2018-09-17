@@ -1,18 +1,17 @@
 <?php
 
 use yii\helpers\Html;
-use kartik\grid\GridView;
+use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\models\TicketSearch */
+/* @var $searchModel app\models\ReceiptSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'تیکت ها';
+$this->title = 'رسیدهای پرداخت شده';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="ticket-index">
 
-    <?php  echo $this->render('_search', ['model' => $searchModel]); ?>
+<div class="ticket-index">
 
     <div class="page-title">
         <div class="title_left">
@@ -21,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="title_right" style="width: 100%;text-align: left;">
 
             <p>
-                <?= Html::a('ثبت تیکت جدید', ['create'], ['class' => 'btn btn-success']) ?>
+                <?= Html::a('ثبت فیش', ['create'], ['class' => 'btn btn-success']) ?>
             </p>
 
         </div>
@@ -47,38 +46,18 @@ $this->params['breadcrumbs'][] = $this->title;
                         'filterModel' => $searchModel,
                         'columns' => [
                             ['class' => 'yii\grid\SerialColumn'],
-                            [
-                                'class' => \kartik\grid\ExpandRowColumn::className(),
-                                'value' => function($model, $key, $index){
-                                    return GridView::ROW_COLLAPSED;
-                                },
-                                'expandOneOnly' => true,
-                                'allowBatchToggle' => false,
-                                'detailAnimationDuration' => 'fast',
-                                'detailUrl' => \yii\helpers\Url::to(['/ticket/details'])
-                            ],
+
                             'id',
 //            'user_id',
                             [
-                                "attribute" => 'deal_id',
+                                "attribute" => 'bank_id',
                                 "value" => function($model) {
-                                    return $model->deal_subject;
+                                    return \app\models\Receipt::banks($model->bank_id);
                                 }
                             ],
-                            [
-                                "attribute" => 'department',
-                                "value" => function($model) {
-                                    return $model->department_name;
-                                }
-                            ],
-                            'title',
-                            [
-                                "attribute" => 'status',
-                                "value" => function($model) {
-                                    return \app\models\Ticket::ticketStatus($model->status);
-                                }
-                            ],
-                            //'body:ntext',
+                            'amount',
+                            'receipt_number',
+                            'description',
                             [
                                 "attribute" => 'created_at',
                                 "value" => function($model) {

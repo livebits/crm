@@ -2,15 +2,15 @@
 
 use yii\helpers\Html;
 
-/* @var $this yii\web\View */
-/* @var $model app\models\Ticket */
 
-$this->title = 'ویرایش تیکت: ' . $model->title;
-$this->params['breadcrumbs'][] = ['label' => 'Tickets', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->title, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Update';
+/* @var $this yii\web\View */
+/* @var $model app\models\Receipt */
+
+$this->title = 'ثبت فیش واریزی';
+$this->params['breadcrumbs'][] = ['label' => 'Receipts', 'url' => ['index']];
+$this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="ticket-update">
+<div class="ticket-create">
 
     <div class="page-title">
         <div class="title_left">
@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = 'Update';
         </div>
         <div class="title_right" style="width: 100%;text-align: left;">
 
-            <a href="<?=Yii::$app->homeUrl . '/ticket/index'?>" class="btn btn-success">لیست تیکت ها</a>
+            <a href="<?=Yii::$app->homeUrl . '/receipt/index'?>" class="btn btn-success">لیست فیش های واریزی</a>
         </div>
     </div>
     <div class="clearfix"></div>
@@ -40,8 +40,6 @@ $this->params['breadcrumbs'][] = 'Update';
 
                     <?= $this->render('_form', [
                         'model' => $model,
-                        'user_deals' => $user_deals,
-                        'departments' => $departments,
                         'mediaFile' => $mediaFile,
                     ]) ?>
 

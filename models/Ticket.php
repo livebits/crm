@@ -56,7 +56,7 @@ class Ticket extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id' => 'کد تیکت',
             'user_id' => 'User ID',
             'deal_id' => 'سفارش مرتبط',
             'department' => 'واحد',
@@ -67,5 +67,20 @@ class Ticket extends \yii\db\ActiveRecord
             'created_at' => 'تاریخ ثبت',
             'updated_at' => 'تاریخ بروز رسانی',
         ];
+    }
+
+    public static function ticketStatus($selected_status = null) {
+        $status = [
+            Ticket::NOT_CHECKED => 'بررسی نشده',
+            Ticket::ANSWERED => 'پاسخ داده شده',
+            Ticket::NEED_REPLY => 'منتظر پاسخ شما',
+            Ticket::CLOSED => 'بسته شده',
+        ];
+
+        if(!isset($selected_status)) {
+            return $status;
+        } else {
+            return $status[$selected_status];
+        }
     }
 }

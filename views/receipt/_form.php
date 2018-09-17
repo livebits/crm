@@ -2,19 +2,17 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use kartik\widgets\Select2;
-//use app\components\UiHtml;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Ticket */
+/* @var $model app\models\Receipt */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="ticket-form">
+<div class="receipt-form">
 
     <?php $form = ActiveForm::begin(
         [
-            'id' => 'ticket-form',
+            'id' => 'receipt-form',
             'options' => [
                 'class' => 'form-horizontal form-label-left',
                 'enctype' => 'multipart/form-data'
@@ -24,15 +22,15 @@ use kartik\widgets\Select2;
 
     <input type="hidden" id="mediaFiles" name="mediaFiles" value="">
 
-    <?= $form->field($model, 'deal_id')
-        ->widget(Select2::className(), ['data' => $user_deals,  'options' => ['dir' => 'rtl', 'placeholder' => 'سفارش مرتبط را انتخاب کنید']]) ?>
+    <?= $form->field($model, 'bank_id')->dropDownList(
+            \app\models\Receipt::banks()
+    ) ?>
 
-    <?= $form->field($model, 'department')
-        ->widget(Select2::className(), ['data' => $departments,  'options' => ['dir' => 'rtl', 'placeholder' => 'واحد را انتخاب کنید']]) ?>
+    <?= $form->field($model, 'amount')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'receipt_number')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'body')->textarea(['rows' => 6]) ?>
+    <?= $form->field($model, 'description')->textarea(['rows' => 6]) ?>
 
     <div class="panel panel-info img-responsive">
         <div class="panel-heading">
@@ -42,7 +40,7 @@ use kartik\widgets\Select2;
             <?= \dosamigos\fileupload\FileUploadUI::widget([
                 'model' => $mediaFile,
                 'attribute' => 'otherFile',
-                'url' => ['ticket/upload-attachment'],
+                'url' => ['receipt/upload-attachment'],
                 'gallery' => false,
                 'fieldOptions' => [
 //                    'accept' => 'images/*'
@@ -63,7 +61,7 @@ use kartik\widgets\Select2;
             if (!$model->isNewRecord) {
                 $media = \app\models\Media::find()
                     ->where('meeting_id=' . $model->id)
-                    ->andWhere('type="TICKET_ATTACHMENT"')
+                    ->andWhere('type="RECEIPT"')
                     ->all();
                 ?>
 
@@ -71,10 +69,10 @@ use kartik\widgets\Select2;
                     <?php
                     foreach ($media as $media_file) {
 
-                        if($media_file->type != \app\models\Media::$TICKET_ATTACHMENT){
+                        if($media_file->type != \app\models\Media::$RECEIPT){
                             continue;
                         }
-                        echo '<tr style="border-bottom: 1px solid #c2c2c2;"><td><a target="_blank" href="'. Yii::$app->homeUrl . 'media/tickets/attachments/' . $media_file->filename . '">' . explode('_', $media_file->filename)[1] . '</a></td></tr>';
+                        echo '<tr style="border-bottom: 1px solid #c2c2c2;"><td><a target="_blank" href="'. Yii::$app->homeUrl . 'media/receipts/' . $media_file->filename . '">' . explode('_', $media_file->filename)[1] . '</a></td></tr>';
                     }
                     ?>
                 </table>
@@ -92,11 +90,10 @@ use kartik\widgets\Select2;
     <?php ActiveForm::end(); ?>
 
 </div>
-
 <script type="text/javascript">
     var media_ids = [];
 
-    $('#ticket-form').on('submit', function () {
+    $('#receipt-form').on('submit', function () {
 
         $('#mediaFiles').val(media_ids);
     });
@@ -106,9 +103,7 @@ use kartik\widgets\Select2;
         media_id = $(this).attr('data-media-id');
         media_type = $(this).attr('data-type');
 
-        // console.log(media_filename + ", " + media_id);
-
-        $.get("<?=Yii::$app->homeUrl?>ticket/media-delete?name="+media_filename+"&media_id="+media_id+"&type="+media_type,
+        $.get("<?=Yii::$app->homeUrl?>receipt/media-delete?name="+media_filename+"&media_id="+media_id+"&type="+media_type,
             function(data, status){
                 location.reload();
             }

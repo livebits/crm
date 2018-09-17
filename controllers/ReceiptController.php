@@ -2,13 +2,11 @@
 
 namespace app\controllers;
 
-use app\models\Deal;
-use app\models\Department;
 use app\models\Media;
 use app\models\MediaFile;
 use Yii;
-use app\models\Ticket;
-use app\models\TicketSearch;
+use app\models\Receipt;
+use app\models\ReceiptSearch;
 use yii\helpers\FileHelper;
 use yii\helpers\Json;
 use yii\web\Controller;
@@ -16,9 +14,9 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * TicketController implements the CRUD actions for Ticket model.
+ * ReceiptController implements the CRUD actions for Receipt model.
  */
-class TicketController extends Controller
+class ReceiptController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -36,37 +34,24 @@ class TicketController extends Controller
     }
 
     /**
-     * Lists all Ticket models.
+     * Lists all Receipt models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new TicketSearch();
-
+        $searchModel = new ReceiptSearch();
         $params = Yii::$app->request->queryParams;
-        $params['TicketSearch']['user_id'] = Yii::$app->user->id. '';
+        $params['ReceiptSearch']['user_id'] = Yii::$app->user->id . '';
         $dataProvider = $searchModel->search($params);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider
-        ]);
-    }
-
-    public function actionAllTickets()
-    {
-        $searchModel = new TicketSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider
+            'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
-     * Displays a single Ticket model.
+     * Displays a single Receipt model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -79,31 +64,20 @@ class TicketController extends Controller
     }
 
     /**
-     * Creates a new Ticket model.
+     * Creates a new Receipt model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Ticket();
-
-        $user_deals = \yii\helpers\ArrayHelper::map(
-            Deal::find()
-                ->leftJoin('user_deal', 'user_deal.deal_id=deal.id')
-                ->where('user_deal.user_id=' . Yii::$app->user->id)
-                ->all(),
-            'id', 'subject');
-        $departments = \yii\helpers\ArrayHelper::map(Department::find()->all(), 'id', 'name');
+        $model = new Receipt();
         $mediaFile = new MediaFile();
 
-        $request = Yii::$app->request;
-
         if ($model->load(Yii::$app->request->post())) {
-            $otherFileIds = $request->post('mediaFiles');
+            $otherFileIds = Yii::$app->request->post('mediaFiles');
 
             $model->user_id = Yii::$app->user->id;
             $model->created_at = time();
-            $model->status = Ticket::NOT_CHECKED;
 
             if($model->save()) {
 
@@ -121,14 +95,12 @@ class TicketController extends Controller
 
         return $this->render('create', [
             'model' => $model,
-            'user_deals' => $user_deals,
-            'departments' => $departments,
             'mediaFile' => $mediaFile,
         ]);
     }
 
     /**
-     * Updates an existing Ticket model.
+     * Updates an existing Receipt model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -137,17 +109,13 @@ class TicketController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $user_deals = \yii\helpers\ArrayHelper::map(Deal::find()->where('id > 0')->all(), 'id', 'subject');
-        $departments = \yii\helpers\ArrayHelper::map(Department::find()->all(), 'id', 'name');
         $mediaFile = new MediaFile();
 
-        $request = Yii::$app->request;
         if ($model->load(Yii::$app->request->post())) {
 
-            $otherFileIds = $request->post('mediaFiles');
+            $otherFileIds = Yii::$app->request->post('mediaFiles');
 
             $model->updated_at = time();
-            $model->status = Ticket::NOT_CHECKED;
 
             if($model->save()) {
 
@@ -165,8 +133,6 @@ class TicketController extends Controller
 
         return $this->render('update', [
             'model' => $model,
-            'user_deals' => $user_deals,
-            'departments' => $departments,
             'mediaFile' => $mediaFile,
         ]);
     }
@@ -180,12 +146,12 @@ class TicketController extends Controller
                 $uid = uniqid(time(), true);
                 $file_name = $uid . '_' . $file_name;
                 $file_tmp = $uploaded_files['tmp_name'][$key];
-                move_uploaded_file($file_tmp, 'media/tickets/attachments/' . $file_name);
+                move_uploaded_file($file_tmp, 'media/receipts/' . $file_name);
 
-                $path = Yii::getAlias('@web') . '/media/tickets/attachments/' . $file_name;
+                $path = Yii::getAlias('@web') . '/media/receipts/' . $file_name;
 
                 $media = new Media();
-                $media->type = 'TICKET_ATTACHMENT';
+                $media->type = Media::$RECEIPT;
                 $media->filename = $file_name;
                 $media->created_at = time();
                 $media->save();
@@ -212,7 +178,7 @@ class TicketController extends Controller
     public function actionMediaDelete($name, $media_id, $myFiles = "")
     {
 
-        $directory = Yii::getAlias('@web') . '/media/tickets/attachments';
+        $directory = Yii::getAlias('@web') . '/media/receipts';
 
         if (is_file($_SERVER["DOCUMENT_ROOT"] . $directory . '/' . $name)) {
             unlink($_SERVER["DOCUMENT_ROOT"] . $directory . '/' . $name);
@@ -239,7 +205,7 @@ class TicketController extends Controller
     }
 
     /**
-     * Deletes an existing Ticket model.
+     * Deletes an existing Receipt model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -253,28 +219,18 @@ class TicketController extends Controller
     }
 
     /**
-     * Finds the Ticket model based on its primary key value.
+     * Finds the Receipt model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Ticket the loaded model
+     * @return Receipt the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Ticket::findOne($id)) !== null) {
+        if (($model = Receipt::findOne($id)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
-    }
-
-    public function actionDetails()
-    {
-        if (Yii::$app->request->isPost && Yii::$app->request->isAjax) {
-            $id = Yii::$app->request->post('expandRowKey');
-            $model = $this->findModel(intval($id));
-
-            return $this->renderAjax('details', compact('model'));
-        }
     }
 }

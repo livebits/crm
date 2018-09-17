@@ -3,6 +3,8 @@
 namespace app\controllers;
 
 use app\components\Jdf;
+use app\models\User;
+use app\models\UserDeal;
 use Yii;
 use app\models\Deal;
 use app\models\DealSearch;
@@ -51,6 +53,24 @@ class DealController extends Controller
         $dataProvider = $searchModel->searchAll(Yii::$app->request->queryParams);
 
         return $this->render('all', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionUserDeals()
+    {
+        $user_deals = UserDeal::find()->select('deal_id')->where('user_id=' . Yii::$app->user->id)->all();
+        $user_deals_id = [];
+        $user_deals_id[] = -1;
+        foreach ($user_deals as $user_deal) {
+            $user_deals_id[] = $user_deal->deal_id;
+        }
+
+        $searchModel = new DealSearch();
+        $dataProvider = $searchModel->searchUserDeals(Yii::$app->request->queryParams, $user_deals_id);
+
+        return $this->render('user_deals', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
@@ -151,5 +171,26 @@ class DealController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionAddUserDeal() {
+        $model = new UserDeal();
+
+        $deals = \yii\helpers\ArrayHelper::map(Deal::find()->all(), 'id', 'subject');
+
+        $users = User::findUsersByRole('customer');
+        $users = \yii\helpers\ArrayHelper::map($users, 'id', 'username');
+
+        if(Yii::$app->request->isPost && $model->load(Yii::$app->request->post())){
+
+            $model->created_at = time();
+            $model->save();
+        }
+
+        return $this->render('add-user-deal', [
+            'model' => $model,
+            'users' => $users,
+            'deals' => $deals
+        ]);
     }
 }

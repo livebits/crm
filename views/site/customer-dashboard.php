@@ -1,53 +1,81 @@
 <?php
 
-/* @var $this yii\web\View */
-
-$this->title = 'My Yii Application';
+$this->title = 'داشبورد CRM';
 ?>
-<div class="site-index">
+<style>
 
-    <div class="jumbotron">
-        <h1>Congratulations!</h1>
+    .tile-stats h3 {
+        margin-top: 10px;
+    }
 
-        <p class="lead">You have successfully created your Yii-powered application.</p>
+</style>
 
-        <p><a class="btn btn-lg btn-success" href="http://www.yiiframework.com">Get started with Yii</a></p>
-    </div>
+<div class="">
+    <div class="row top_tiles">
 
-    <div class="body-content">
-
-        <div class="row">
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/doc/">Yii Documentation &raquo;</a></p>
+        <a href="<?=Yii::$app->homeUrl?>ticket/index">
+            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-user-times"></i></div>
+                    <div class="count"><?=$all_tickets?></div>
+                    <h3>کل تیکت ها</h3>
+                </div>
             </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
+        </a>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/forum/">Yii Forum &raquo;</a></p>
+        <a href="<?=Yii::$app->homeUrl?>ticket/index">
+            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-user"></i></div>
+                    <div class="count"><?=$done_tickets?></div>
+                    <h3>انجام شده</h3>
+                </div>
             </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
+        </a>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/extensions/">Yii Extensions &raquo;</a></p>
+        <a href="<?=Yii::$app->homeUrl?>ticket/index">
+            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-address-book"></i></div>
+                    <div class="count"><?=$in_progress_tickets?></div>
+                    <h3>در حال انجام</h3>
+                </div>
             </div>
-        </div>
+        </a>
 
     </div>
+    <div class="row top_tiles">
+
+        <a href="<?=Yii::$app->homeUrl?>ticket/index">
+            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-user-circle"></i></div>
+                    <div class="count"><?=$waiting_tickets?></div>
+                    <h3>منتظر پاسخ شما</h3>
+                </div>
+            </div>
+        </a>
+
+        <a href="<?=Yii::$app->homeUrl?>receipt/index">
+            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-money"></i></div>
+                    <div class="count"><?=$dept_amount?></div>
+                    <h3>بدهی</h3>
+                </div>
+            </div>
+        </a>
+
+        <a href="<?=Yii::$app->homeUrl?>deal/user-deals">
+            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-calendar"></i></div>
+                    <div class="count"><?=$current_deals?></div>
+                    <h3>قراردادهای جاری</h3>
+                </div>
+            </div>
+        </a>
+
+    </div>
+
 </div>

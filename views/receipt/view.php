@@ -4,13 +4,12 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Ticket */
+/* @var $model app\models\Receipt */
 
-$this->title = 'مشاهده تیکت: '  . $model->title;
-$this->params['breadcrumbs'][] = ['label' => 'Tickets', 'url' => ['index']];
+$this->title = ' مشاهده فیش: ' . $model->id;
+$this->params['breadcrumbs'][] = ['label' => 'Receipts', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-
 <div class="ticket-view">
 
     <div class="page-title">
@@ -20,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="title_right" style="width: 100%;text-align: left;">
 
 
-            <?= Html::a('تیکت ها', ['index'], ['class' => 'btn btn-primary']) ?>
+            <?= Html::a('لیست فیش های واریزی', ['index'], ['class' => 'btn btn-primary']) ?>
             <?= Html::a('بروز رسانی', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
             <?= Html::a('حذف', ['delete', 'id' => $model->id], [
                 'class' => 'btn btn-danger',
@@ -52,36 +51,34 @@ $this->params['breadcrumbs'][] = $this->title;
                         'model' => $model,
                         'attributes' => [
                             'id',
+                            'bank_id',
                             [
-                                "attribute" => 'deal_id',
+                                "attribute" => 'bank_id',
                                 "value" => function($model) {
-                                    $deal = \app\models\Deal::find()->where("id=" . $model->deal_id)->one();
-                                    return $deal->subject;
+                                    return \app\models\Receipt::banks(intval($model->bank_id));
                                 }
                             ],
                             [
-                                "attribute" => 'department',
+                                "attribute" => 'amount',
                                 "value" => function($model) {
-                                    $department = \app\models\Department::find()->where("id=" . $model->department)->one();
-                                    return $department->name;
+                                    return number_format($model->amount);
                                 }
                             ],
-                            'title',
-                            'body:ntext',
+                            'receipt_number',
+                            'description',
                             [
                                 "attribute" => 'created_at',
                                 "value" => function($model) {
                                     return \app\components\Jdf::jdate("Y/m/d", $model->created_at);
                                 }
                             ],
-//                            'updated_at',
                         ],
                     ]) ?>
 
                     <?php
                     $media = \app\models\Media::find()
                         ->where('meeting_id=' . $model->id)
-                        ->andWhere('type="TICKET_ATTACHMENT"')
+                        ->andWhere('type="' . \app\models\Media::$RECEIPT . '"')
                         ->all();
 
                     ?>
@@ -94,7 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?php
                                 foreach ($media as $media_file) {
 
-                                    echo '<tr style="border-bottom: 1px solid #c2c2c2;"><td><a target="_blank" href="'. Yii::$app->homeUrl . 'media/tickets/attachments/' . $media_file->filename . '">' . explode('_', $media_file->filename)[1] . '</a></td></tr>';
+                                    echo '<tr style="border-bottom: 1px solid #c2c2c2;"><td><a target="_blank" href="'. Yii::$app->homeUrl . 'media/receipts/' . $media_file->filename . '">' . explode('_', $media_file->filename)[1] . '</a></td></tr>';
                                 }
                                 ?>
                             </table>

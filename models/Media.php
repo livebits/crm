@@ -21,6 +21,8 @@ class Media extends \yii\db\ActiveRecord
     public static $AUDIO = "AUDIO";
     public static $IMAGE = "IMAGE";
     public static $OTHER = "OTHER";
+    public static $TICKET_ATTACHMENT = "TICKET_ATTACHMENT";
+    public static $RECEIPT = "RECEIPT";
 
     /**
      * {@inheritdoc}

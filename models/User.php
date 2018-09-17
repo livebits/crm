@@ -180,6 +180,16 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
         return false;
     }
 
+    public static function findUsersByRole($role)
+    {
+        return (new \yii\db\Query())
+            ->select('*')
+            ->from('auth_assignment')
+            ->leftJoin('user', 'user.id = auth_assignment.user_id')
+            ->where("item_name = '{$role}'")
+            ->all();
+    }
+
     public static function getSubCustomers($return_ids = false) {
         $user = \webvimark\modules\UserManagement\models\User::getCurrentUser();
         if(Yii::$app->user->isSuperadmin  || $user::hasRole(['Admin'], $superAdminAllowed = true)) {
