@@ -3,12 +3,9 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
-use app\widgets\Alert;
-use yii\helpers\Html;
-use yii\bootstrap\Nav;
-use yii\bootstrap\NavBar;
-use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
+use kartik\alert\AlertBlock;
+use yii\helpers\Html;
 
 AppAsset::register($this);
 ?>
@@ -240,6 +237,12 @@ AppAsset::register($this);
 
         <!-- page content -->
         <div class="right_col" role="main">
+            <?php
+            echo AlertBlock::widget([
+                'type' => AlertBlock::TYPE_GROWL,
+                'useSessionFlash' => true,
+            ]);
+            ?>
             <?= $content ?>
         </div>
         <!-- /page content -->

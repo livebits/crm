@@ -34,6 +34,16 @@ use kartik\widgets\Select2;
 
     <?= $form->field($model, 'body')->textarea(['rows' => 6]) ?>
 
+    <?php
+    if (!$model->isNewRecord) {
+        ?>
+        <?= $form->field($model, 'status')->dropDownList(
+            \app\models\Ticket::ticketStatus()
+        ) ?>
+        <?php
+    }
+    ?>
+
     <div class="panel panel-info img-responsive">
         <div class="panel-heading">
             ضمیمه

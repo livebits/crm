@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\ExpertDepartment;
+use app\models\User;
 use Yii;
 use app\models\Department;
 use app\models\DepartmentSearch;
@@ -123,5 +125,31 @@ class DepartmentController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /*
+     * Add user(expert) to one or more departments
+     */
+    public function actionAddExpertDepartment() {
+        $model = new ExpertDepartment();
+
+        $departments = \yii\helpers\ArrayHelper::map(Department::find()->all(), 'id', 'name');
+
+        $users = User::findUsersByRole('expert');
+        $users = \yii\helpers\ArrayHelper::map($users, 'id', 'username');
+
+        if(Yii::$app->request->isPost && $model->load(Yii::$app->request->post())){
+
+            $model->created_at = time();
+            $model->save();
+
+            Yii::$app->session->setFlash('success', 'اطلاعات با موفقیت ذخیره شد');
+        }
+
+        return $this->render('add-expert-department', [
+            'model' => $model,
+            'users' => $users,
+            'departments' => $departments
+        ]);
     }
 }

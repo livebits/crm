@@ -58,6 +58,7 @@ class DealController extends Controller
         ]);
     }
 
+    //Show user(custom) deals
     public function actionUserDeals()
     {
         $user_deals = UserDeal::find()->select('deal_id')->where('user_id=' . Yii::$app->user->id)->all();
@@ -173,6 +174,9 @@ class DealController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
+    /*
+     * Add user(customer) to one or more deals
+     */
     public function actionAddUserDeal() {
         $model = new UserDeal();
 

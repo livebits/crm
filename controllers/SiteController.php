@@ -6,11 +6,13 @@ use app\models\Customer;
 use app\models\Deal;
 use app\models\Meeting;
 use app\models\Ticket;
+use app\models\UserDeal;
 use app\models\UserProfile;
 use Yii;
 use yii\db\Query;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\AuthItem;
@@ -70,7 +72,7 @@ class SiteController extends Controller
     public function actionIndex()
     {
         $user = User::getCurrentUser();
-        if($user::hasRole(['customer'], $superAdminAllowed = true)) {
+        if(!$user::hasRole(['Admin'], $superAdminAllowed = true) && $user::hasRole(['customer'], $superAdminAllowed = false)) {
             return $this->redirect(['site/customer-dashboard']);
         }
 
@@ -582,6 +584,18 @@ class SiteController extends Controller
         $all_tickets = $done_tickets = $in_progress_tickets = $waiting_tickets = $dept_amount = $current_deals = 0;
 
         $all_tickets = Ticket::find()->where('user_id=' . Yii::$app->user->id)->count();
+        $done_tickets = Ticket::find()
+            ->where('user_id=' . Yii::$app->user->id)
+            ->andWhere('status=' . Ticket::CLOSED)
+            ->count();
+        $in_progress_tickets = $all_tickets - $done_tickets;
+        $waiting_tickets = Ticket::find()
+            ->where('user_id=' . Yii::$app->user->id)
+            ->andWhere('status=' . Ticket::NEED_CUSTOMER_REPLY)
+            ->count();
+        $current_deals = UserDeal::find()
+            ->where('user_id=' . Yii::$app->user->id)
+            ->count();
 
         return $this->render('customer-dashboard', compact('all_tickets', 'done_tickets', 'in_progress_tickets', 'waiting_tickets', 'dept_amount', 'current_deals'));
     }

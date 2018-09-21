@@ -74,6 +74,12 @@ $this->params['breadcrumbs'][] = $this->title;
                                     return \app\components\Jdf::jdate("Y/m/d", $model->created_at);
                                 }
                             ],
+                            [
+                                "attribute" => 'status',
+                                "value" => function($model) {
+                                    return \app\models\Ticket::ticketStatus($model->status);
+                                }
+                            ],
 //                            'updated_at',
                         ],
                     ]) ?>

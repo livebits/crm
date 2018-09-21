@@ -4,13 +4,12 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use kartik\widgets\Select2;
 
-$this->title = 'افزودن مشتری برای قرارداد';
+$this->title = 'افزودن کارشناس به واحد(دپارتمان)';
 /* @var $this yii\web\View */
 /* @var $model app\models\Ticket */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 <div class="deal-create">
-
 
     <div class="page-title">
         <div class="title_left">
@@ -37,19 +36,19 @@ $this->title = 'افزودن مشتری برای قرارداد';
                     <br/>
 
                     <?php $form = ActiveForm::begin([
-                            'options' => [
-                                'class' => 'form-vertical',
-                            ]
+                        'options' => [
+                            'class' => 'form-vertical',
+                        ]
                     ]); ?>
 
                     <div class="col-md-4">
-                    <?= $form->field($model, 'deal_id')
-                        ->widget(Select2::className(), ['data' => $deals,  'options' => ['dir' => 'rtl', 'placeholder' => 'سفارش مرتبط را انتخاب کنید']]) ?>
+                        <?= $form->field($model, 'department_id')
+                            ->widget(Select2::className(), ['data' => $departments, 'options' => ['dir' => 'rtl', 'placeholder' => 'واحد مورد نظر را انتخاب کنید']]) ?>
                     </div>
 
                     <div class="col-md-4">
-                    <?= $form->field($model, 'user_id')
-                        ->widget(Select2::className(), ['data' => $users,  'options' => ['dir' => 'rtl', 'placeholder' => 'مشتری را انتخاب کنید']]) ?>
+                        <?= $form->field($model, 'expert_id')
+                            ->widget(Select2::className(), ['data' => $users, 'options' => ['dir' => 'rtl', 'placeholder' => 'کارشناس مرتبط را انتخاب کنید']]) ?>
                     </div>
 
                     <div class="col-md-2" style="padding-top: 23px;">

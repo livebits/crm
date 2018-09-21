@@ -14,6 +14,7 @@ use Yii;
  * @property string $title
  * @property string $body
  * @property string $status
+ * @property string $reply_to
  * @property string $attachment
  * @property int $created_at
  * @property int $updated_at
@@ -25,8 +26,18 @@ class Ticket extends \yii\db\ActiveRecord
      */
     const NOT_CHECKED = 0;
     const ANSWERED = 1;
-    const NEED_REPLY = 2;
-    const CLOSED = 3;
+    const NEED_CUSTOMER_REPLY = 2;
+    const NEED_EXPERT_REPLY = 3;
+    const PENDING = 4;
+    const CLOSED = 5;
+    ///////////////////////////
+    ///
+    /// Reply tickets statuses
+    ///
+    /// EXPERT -> expert replied
+    /// CUSTOMER -> customer replied
+    const EXPERT_REPLIED = 100;
+    const CUSTOMER_REPLIED = 101;
     ///////////////////////////
 
     /**
@@ -43,7 +54,7 @@ class Ticket extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'deal_id', 'department', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['user_id', 'deal_id', 'department', 'status', 'reply_to', 'created_at', 'updated_at'], 'integer'],
             [['deal_id', 'department', 'body'], 'required'],
             [['body'], 'string'],
             [['title', 'attachment'], 'string', 'max' => 255],
@@ -73,7 +84,9 @@ class Ticket extends \yii\db\ActiveRecord
         $status = [
             Ticket::NOT_CHECKED => 'بررسی نشده',
             Ticket::ANSWERED => 'پاسخ داده شده',
-            Ticket::NEED_REPLY => 'منتظر پاسخ شما',
+            Ticket::NEED_CUSTOMER_REPLY => 'منتظر پاسخ شما',
+            Ticket::NEED_EXPERT_REPLY => 'در انتظار پاسخ کارشناس',
+            Ticket::PENDING => 'در حال بررسی',
             Ticket::CLOSED => 'بسته شده',
         ];
 

@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
         <div class="title_right" style="width: 100%;text-align: left;">
 
-            <a href="<?=Yii::$app->homeUrl . '/ticket/index'?>" class="btn btn-success">لیست تیکت ها</a>
+            <a href="<?=Yii::$app->homeUrl . 'ticket/index'?>" class="btn btn-success">لیست تیکت ها</a>
         </div>
     </div>
     <div class="clearfix"></div>

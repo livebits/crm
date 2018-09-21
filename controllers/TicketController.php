@@ -4,11 +4,15 @@ namespace app\controllers;
 
 use app\models\Deal;
 use app\models\Department;
+use app\models\ExpertDepartment;
+use app\models\ExpertTicket;
 use app\models\Media;
 use app\models\MediaFile;
+use app\models\User;
 use Yii;
 use app\models\Ticket;
 use app\models\TicketSearch;
+use yii\data\ActiveDataProvider;
 use yii\helpers\FileHelper;
 use yii\helpers\Json;
 use yii\web\Controller;
@@ -44,8 +48,48 @@ class TicketController extends Controller
         $searchModel = new TicketSearch();
 
         $params = Yii::$app->request->queryParams;
-        $params['TicketSearch']['user_id'] = Yii::$app->user->id. '';
+        $params['TicketSearch']['user_id'] = Yii::$app->user->id . '';
         $dataProvider = $searchModel->search($params);
+
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function actionExpertTickets()
+    {
+        $searchModel = new TicketSearch();
+
+        $params = Yii::$app->request->queryParams;
+
+        //find expert department
+        $expertDeps = ExpertDepartment::find()
+            ->select('department_id')
+            ->where('expert_id=' . Yii::$app->user->id)
+            ->asArray()
+            ->all();
+        $deps = [];
+        $deps[] = -1;
+        foreach ($expertDeps as $expertDep) {
+            $deps[] = intval($expertDep['department_id']);
+        }
+
+        //expert tickets
+        $expertTickets = ExpertTicket::find()
+            ->select('ticket_id')
+            ->where('expert_id=' . Yii::$app->user->id)
+            ->asArray()
+            ->all();
+        $tickets_id = [];
+        $tickets_id[] = -1;
+        foreach ($expertTickets as $expertTicket) {
+            $tickets_id[] = intval($expertTicket['ticket_id']);
+        }
+        $dataProvider = $searchModel->search($params, $deps, $tickets_id);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -105,7 +149,7 @@ class TicketController extends Controller
             $model->created_at = time();
             $model->status = Ticket::NOT_CHECKED;
 
-            if($model->save()) {
+            if ($model->save()) {
 
                 if ($otherFileIds != "") {
                     $mediaIds = explode(',', $otherFileIds);
@@ -149,7 +193,7 @@ class TicketController extends Controller
             $model->updated_at = time();
             $model->status = Ticket::NOT_CHECKED;
 
-            if($model->save()) {
+            if ($model->save()) {
 
                 if ($otherFileIds != "") {
                     $mediaIds = explode(',', $otherFileIds);
@@ -276,5 +320,100 @@ class TicketController extends Controller
 
             return $this->renderAjax('details', compact('model'));
         }
+
+        return '';
+    }
+
+    public function actionReply($id)
+    {
+
+        $model = $this->findModel(intval($id));
+        $ticket = new Ticket();
+        $ticket->department = $model->department;
+        $ticket->deal_id = $model->deal_id;
+        $ticket->reply_to = $model->id;
+
+        $ticket->status = User::is_in_role(Yii::$app->user->id, 'customer') ? Ticket::CUSTOMER_REPLIED : Ticket::EXPERT_REPLIED;
+
+        if ($ticket->load(Yii::$app->request->post())) {
+
+            $ticket->user_id = Yii::$app->user->id;
+            $ticket->created_at = time();
+
+            if ($ticket->save()) {
+
+                if (!Yii::$app->user->isSuperadmin && User::is_in_role(Yii::$app->user->id, 'customer')) {
+                    $model->status = Ticket::NEED_EXPERT_REPLY;
+                } else if (User::is_in_role(Yii::$app->user->id, 'expert')) {
+                    $model->status = Ticket::NEED_CUSTOMER_REPLY;
+                }
+
+                $model->save();
+
+                Yii::$app->session->setFlash('success', 'پاسخ شما با موفقیت ذخیره شد');
+            }
+        }
+
+        $tickets = Ticket::find()
+            ->where('id=' . $id)
+            ->orWhere('reply_to=' . $id)
+            ->orderBy('created_at ASC');
+        $dataProvider = new ActiveDataProvider([
+            'query' => $tickets,
+        ]);
+
+        return $this->render('reply', [
+            'ticket' => $ticket,
+            'model' => $model,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionCheck($id)
+    {
+        $model = $this->findModel(intval($id));
+        $model->status = Ticket::PENDING;
+        $model->save();
+
+        return $this->redirect('expert-tickets');
+    }
+
+    public function actionClose($id)
+    {
+        $model = $this->findModel(intval($id));
+        $model->status = Ticket::CLOSED;
+        $model->save();
+
+        if (User::is_in_role(Yii::$app->user->id, 'customer')) {
+            return $this->redirect('index');
+        } else {
+            return $this->redirect('expert-tickets');
+        }
+    }
+
+    /*
+     * Add user(expert) to one or more tickets
+     */
+    public function actionAddExpertTicket() {
+        $model = new ExpertTicket();
+
+        $tickets = \yii\helpers\ArrayHelper::map(Ticket::find()->all(), 'id', 'title');
+
+        $users = User::findUsersByRole('expert');
+        $users = \yii\helpers\ArrayHelper::map($users, 'id', 'username');
+
+        if(Yii::$app->request->isPost && $model->load(Yii::$app->request->post())){
+
+            $model->created_at = time();
+            $model->save();
+
+            Yii::$app->session->setFlash('success', 'اطلاعات با موفقیت ذخیره شد');
+        }
+
+        return $this->render('add-expert-tickets', [
+            'model' => $model,
+            'users' => $users,
+            'tickets' => $tickets
+        ]);
     }
 }

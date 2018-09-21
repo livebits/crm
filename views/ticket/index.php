@@ -42,6 +42,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
                 <div class="x_content">
 
+                    <?php
+                    $template = '';
+                    $user_id = Yii::$app->user->id;
+                    if(\app\models\User::is_in_role($user_id, 'Admin')) {
+                        $template = '{update} {view} {delete} {reply} {check} {close}';
+
+                    } else if(\app\models\User::is_in_role($user_id, 'expert')) {
+                        $template = '{update} {view} {reply} {check} {close}';
+
+                    } else if(\app\models\User::is_in_role($user_id, 'customer')) {
+                        $template = '{view} {reply} {close}';
+                    }
+                    ?>
                     <?= GridView::widget([
                         'dataProvider' => $dataProvider,
                         'filterModel' => $searchModel,
@@ -87,7 +100,21 @@ $this->params['breadcrumbs'][] = $this->title;
                             ],
                             //'updated_at',
 
-                            ['class' => 'yii\grid\ActionColumn'],
+                            [
+                                'class' => 'yii\grid\ActionColumn',
+                                'template' => $template,
+                                'buttons' => [
+                                    'reply' => function ($url, $model, $key) {
+                                        return "<a href=". $url ." title='پاسخ'><i class='fa fa-reply'></i></a>";
+                                    },
+                                    'check' => function ($url, $model, $key) {
+                                        return "<a href=". $url ." title='در حال بررسی'><i class='fa fa-search'></i></a>";
+                                    },
+                                    'close' => function ($url, $model, $key) {
+                                        return "<a href=". $url ." title='بستن تیکت'><i class='fa fa-close'></i></a>";
+                                    }
+                                ]
+                            ],
                         ],
                     ]); ?>
 

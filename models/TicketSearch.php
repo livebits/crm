@@ -44,7 +44,7 @@ class TicketSearch extends Ticket
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $departments = null, $tickets_id = null)
     {
         $query = $this::find()
             ->select(['ticket.*', 'department.name as department_name', 'deal.subject as deal_subject'])
@@ -55,6 +55,13 @@ class TicketSearch extends Ticket
 
 
         // add conditions that should always apply here
+        if(isset($departments)) {
+            $query = $query->orWhere('department IN (' . implode(',', $departments)  . ')');
+        }
+
+        if(isset($tickets_id)) {
+            $query = $query->orWhere('ticket.id IN (' . implode(',', $tickets_id)  . ')');
+        }
 
         $this->load($params);
 
@@ -76,6 +83,8 @@ class TicketSearch extends Ticket
 
         $query->andFilterWhere(['like', 'title', $this->title])
             ->andFilterWhere(['like', 'body', $this->body]);
+
+        $query = $query->andWhere('reply_to IS NULL');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
