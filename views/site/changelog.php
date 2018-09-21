@@ -33,6 +33,15 @@ $this->title = 'تغییرات';
     <div class="well">
 
         <div class="change">
+            <span class="version_number pull-right">V 2.1.0</span>
+            <span class="version_date pull-right">97/6/30</span>
+            <div style="clear: both"></div>
+            <ul class="change-list">
+                <li>سیستم مدیریت تیکت</li>
+            </ul>
+        </div>
+
+        <div class="change">
             <span class="version_number pull-right">V 2.0.1</span>
             <span class="version_date pull-right">97/5/18</span>
             <div style="clear: both"></div>
