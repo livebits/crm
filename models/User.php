@@ -186,7 +186,7 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
         {
             return true;
         }
-        if((new \yii\db\Query())->select('COUNT(*)')->from('auth_assignment')->where("user_id = :user_id AND item_name = ':role'", [':user_id' => $id, ':role' => $role])->scalar() > 0){
+        if((new \yii\db\Query())->select('COUNT(*)')->from('auth_assignment')->where("user_id = :user_id AND item_name = :role", [':user_id' => $id, ':role' => $role])->scalar() > 0){
             return true;
         }
         return false;

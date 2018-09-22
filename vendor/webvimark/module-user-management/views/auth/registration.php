@@ -24,7 +24,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'validateOnBlur'=>false,
     ]); ?>
 
-    <?= $form->field($model, 'username')->textInput(['maxlength' => 50, 'autocomplete'=>'off', 'autofocus'=>true]) ?>
+    <?= $form->field($model, 'username')->textInput(['maxlength' => 50, 'autocomplete'=>'off', 'autofocus'=>true])
+            ->label('نام کاربری')?>
 
     <?= $form->field($model, 'password')->passwordInput(['maxlength' => 255, 'autocomplete'=>'off']) ?>
 

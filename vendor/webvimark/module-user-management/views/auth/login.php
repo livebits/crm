@@ -42,18 +42,21 @@ use yii\helpers\Html;
 					) ?>
 
 					<div class="row registration-block">
-						<div class="col-sm-6">
+						<div class="col-sm-12">
 							<?= GhostHtml::a(
 								UserManagementModule::t('front', "Registration"),
-								['/user-management/auth/registration']
+								['/user-management/auth/registration'],
+                                [
+                                        'style' => 'font-size: 20px;'
+                                ]
 							) ?>
 						</div>
-						<div class="col-sm-6 text-right">
-							<?= GhostHtml::a(
-								UserManagementModule::t('front', "Forgot password ?"),
-								['/user-management/auth/password-recovery']
-							) ?>
-						</div>
+<!--						<div class="col-sm-6 text-right">-->
+<!--							--><?//= GhostHtml::a(
+//								UserManagementModule::t('front', "Forgot password ?"),
+//								['/user-management/auth/password-recovery']
+//							) ?>
+<!--						</div>-->
 					</div>
 
 
