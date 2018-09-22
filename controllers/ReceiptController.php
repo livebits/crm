@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Log;
 use app\models\Media;
 use app\models\MediaFile;
 use Yii;
@@ -88,6 +89,8 @@ class ReceiptController extends Controller
                         Media::updateAll(['meeting_id' => $model->id], ['id' => $mediaId]);
                     }
                 }
+
+                Log::addLog(Log::AddNewReceipt, $model->id);
 
                 return $this->redirect(['view', 'id' => $model->id]);
             }

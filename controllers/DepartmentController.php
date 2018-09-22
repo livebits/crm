@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\ExpertDepartment;
+use app\models\Log;
 use app\models\User;
 use Yii;
 use app\models\Department;
@@ -145,6 +146,8 @@ class DepartmentController extends Controller
 
             Yii::$app->session->setFlash('success', 'اطلاعات با موفقیت ذخیره شد');
         }
+
+        Log::addLog(Log::AddExpertToDepartment, $model->expert_id . '-' . $model->department_id);
 
         return $this->render('add-expert-department', [
             'model' => $model,

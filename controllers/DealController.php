@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\components\Jdf;
+use app\models\Log;
 use app\models\User;
 use app\models\UserDeal;
 use Yii;
@@ -58,7 +59,7 @@ class DealController extends Controller
         ]);
     }
 
-    //Show user(custom) deals
+    //Show user(customer) deals
     public function actionUserDeals()
     {
         $user_deals = UserDeal::find()->select('deal_id')->where('user_id=' . Yii::$app->user->id)->all();
@@ -190,6 +191,8 @@ class DealController extends Controller
             $model->created_at = time();
             $model->save();
         }
+
+        Log::addLog(Log::AddUserToDeal, $model->user_id . '-' . $model->deal_id);
 
         return $this->render('add-user-deal', [
             'model' => $model,

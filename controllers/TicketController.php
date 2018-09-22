@@ -6,6 +6,7 @@ use app\models\Deal;
 use app\models\Department;
 use app\models\ExpertDepartment;
 use app\models\ExpertTicket;
+use app\models\Log;
 use app\models\Media;
 use app\models\MediaFile;
 use app\models\User;
@@ -159,6 +160,8 @@ class TicketController extends Controller
                     }
                 }
 
+                Log::addLog(Log::AddNewTicket, $model->id);
+
                 return $this->redirect(['view', 'id' => $model->id]);
             }
         }
@@ -202,6 +205,8 @@ class TicketController extends Controller
                         Media::updateAll(['meeting_id' => $model->id], ['id' => $mediaId]);
                     }
                 }
+
+                Log::addLog(Log::AddNewTicket, $model->id . '-' . $model->status);
 
                 return $this->redirect(['view', 'id' => $model->id]);
             }
@@ -350,6 +355,8 @@ class TicketController extends Controller
 
                 $model->save();
 
+                Log::addLog(Log::ReplyTicket, $model->id . '-' . $model->status);
+
                 Yii::$app->session->setFlash('success', 'پاسخ شما با موفقیت ذخیره شد');
             }
         }
@@ -375,6 +382,8 @@ class TicketController extends Controller
         $model->status = Ticket::PENDING;
         $model->save();
 
+        Log::addLog(Log::CheckTicket, $model->id . '-' . $model->status);
+
         return $this->redirect('expert-tickets');
     }
 
@@ -383,6 +392,8 @@ class TicketController extends Controller
         $model = $this->findModel(intval($id));
         $model->status = Ticket::CLOSED;
         $model->save();
+
+        Log::addLog(Log::CloseTicket, $model->id . '-' . $model->status);
 
         if (User::is_in_role(Yii::$app->user->id, 'customer')) {
             return $this->redirect('index');
@@ -409,6 +420,8 @@ class TicketController extends Controller
 
             Yii::$app->session->setFlash('success', 'اطلاعات با موفقیت ذخیره شد');
         }
+
+        Log::addLog(Log::AddTicketForExpert, $model->ticket_id . '-' . $model->expert_id);
 
         return $this->render('add-expert-tickets', [
             'model' => $model,
