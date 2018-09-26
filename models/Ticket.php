@@ -55,7 +55,7 @@ class Ticket extends \yii\db\ActiveRecord
     {
         return [
             [['user_id', 'deal_id', 'department', 'status', 'reply_to', 'created_at', 'updated_at'], 'integer'],
-            [['deal_id', 'department', 'body', 'title'], 'required'],
+            [['deal_id', 'department', 'body'], 'required'],
             [['body'], 'string'],
             [['title', 'attachment'], 'string', 'max' => 255],
         ];
