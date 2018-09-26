@@ -9,6 +9,8 @@ use app\models\UserDeal;
 use Yii;
 use app\models\Deal;
 use app\models\DealSearch;
+use yii\data\ActiveDataProvider;
+use yii\db\Query;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -190,14 +192,38 @@ class DealController extends Controller
 
             $model->created_at = time();
             $model->save();
+
+            Log::addLog(Log::AddUserToDeal, $model->user_id . '-' . $model->deal_id);
         }
 
-        Log::addLog(Log::AddUserToDeal, $model->user_id . '-' . $model->deal_id);
+        $query = (new Query())
+            ->select(['user_deal.id', 'user.username', 'deal.subject', 'user_deal.created_at'])
+            ->from('user_deal')
+            ->leftJoin('user', 'user.id=user_deal.user_id')
+            ->leftJoin('deal', 'deal.id=user_deal.deal_id');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
 
         return $this->render('add-user-deal', [
+            'dataProvider' => $dataProvider,
             'model' => $model,
             'users' => $users,
             'deals' => $deals
         ]);
+    }
+
+    //remove user(customer) from deal
+    public function actionDeleteUserDeal($id) {
+
+        $userDeal = UserDeal::find()->where('id='.$id)->one();
+
+        if($userDeal) {
+            $userDeal->delete();
+            return $this->redirect('add-user-deal');
+        }
+
+        throw new ForbiddenHttpException('شما اجازه دسترسی به این بخش را ندارید');
     }
 }

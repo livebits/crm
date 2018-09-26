@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use kartik\widgets\Select2;
+use kartik\grid\GridView;
 
 $this->title = 'افزودن کارشناس به واحد(دپارتمان)';
 /* @var $this yii\web\View */
@@ -56,6 +57,45 @@ $this->title = 'افزودن کارشناس به واحد(دپارتمان)';
                     </div>
 
                     <?php ActiveForm::end(); ?>
+
+                    <hr>
+
+                    <?= GridView::widget([
+                        'dataProvider' => $dataProvider,
+                        'columns' => [
+                            ['class' => 'yii\grid\SerialColumn'],
+//                            'id',
+                            [
+                                "attribute" => 'username',
+                                'label' => 'نام کارشناس',
+                            ],
+                            [
+                                "attribute" => 'name',
+                                'label' => 'واحد',
+                            ],
+                            [
+                                "attribute" => 'created_at',
+                                'label' => 'تاریخ ثبت',
+                                "value" => function($model) {
+                                    return \app\components\Jdf::jdate("Y/m/d", $model['created_at']);
+                                }
+                            ],
+                            [
+                                'class' => 'yii\grid\ActionColumn',
+                                'template' => '{delete}',
+                                'buttons' => [
+                                    'delete' => function ($url, $model, $key) {
+
+                                        $url = Yii::$app->urlManager->createUrl([
+                                            'department/delete-expert-department',
+                                            'id' => $model['id'],
+                                        ]);
+                                        return "<a href=". $url ." title='حذف'><i class='fa fa-trash'></i></a>";
+                                    }
+                                ]
+                            ],
+                        ],
+                    ]); ?>
 
                 </div>
             </div>

@@ -91,7 +91,14 @@ AppAsset::register($this);
                             else{
                                 $menu = \app\controllers\SiteController::getAdminMenu();
                             }
+
+                            $userRole = \app\models\User::getRole(Yii::$app->user->id);
                             foreach ($menu as $item) {
+                                if(!Yii::$app->user->isSuperadmin && $userRole != $item['item_name'])
+                                {
+                                    continue;
+                                }
+
                                 $item_url = strpos($item['name'], '/') == 0 ? substr($item['name'], 1): $item['name'];
                                 ?>
                                 <li>
@@ -102,6 +109,12 @@ AppAsset::register($this);
                                 </li>
                             <?php }?>
 
+                            <li>
+                                <a href="<?= Yii::$app->homeUrl ?>user-management/auth/logout">
+                                    <i class="fa fa-sign-out"></i>
+                                    <span class="nav-label color">خروج</span>
+                                </a>
+                            </li>
                         </ul>
                     </div>
 

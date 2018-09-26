@@ -14,6 +14,7 @@ use Yii;
 use app\models\Ticket;
 use app\models\TicketSearch;
 use yii\data\ActiveDataProvider;
+use yii\db\Query;
 use yii\helpers\FileHelper;
 use yii\helpers\Json;
 use yii\web\Controller;
@@ -418,15 +419,39 @@ class TicketController extends Controller
             $model->created_at = time();
             $model->save();
 
+            Log::addLog(Log::AddTicketForExpert, $model->ticket_id . '-' . $model->expert_id);
+
             Yii::$app->session->setFlash('success', 'اطلاعات با موفقیت ذخیره شد');
         }
 
-        Log::addLog(Log::AddTicketForExpert, $model->ticket_id . '-' . $model->expert_id);
+        $query = (new Query())
+            ->select(['expert_ticket.id', 'user.username', 'ticket.title', 'expert_ticket.created_at'])
+            ->from('expert_ticket')
+            ->leftJoin('user', 'user.id=expert_ticket.expert_id')
+            ->leftJoin('ticket', 'ticket.id=expert_ticket.ticket_id');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
 
         return $this->render('add-expert-tickets', [
+            'dataProvider' => $dataProvider,
             'model' => $model,
             'users' => $users,
             'tickets' => $tickets
         ]);
+    }
+
+    //remove expert from ticket
+    public function actionDeleteExpertTicket($id) {
+
+        $expertTicket = ExpertTicket::find()->where('id='.$id)->one();
+
+        if($expertTicket) {
+            $expertTicket->delete();
+            return $this->redirect('add-expert-ticket');
+        }
+
+        throw new ForbiddenHttpException('شما اجازه دسترسی به این بخش را ندارید');
     }
 }

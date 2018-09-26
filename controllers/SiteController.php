@@ -12,6 +12,7 @@ use Yii;
 use yii\db\Query;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\filters\VerbFilter;
@@ -278,7 +279,7 @@ class SiteController extends Controller
     {
         $user = Yii::$app->user;
         $urls = (new \yii\db\Query())
-            ->select(['ai.name', 'ai.description', 'ai.data', 'ai.position'])
+            ->select(['ai.name', 'ai.description', 'ai.data', 'ai.position', 'aa.item_name'])
             ->from('auth_assignment aa')
             ->innerJoin('auth_item_child aic', 'aa.item_name = aic.parent')
             ->innerJoin('auth_item ai', 'ai.name = aic.child')

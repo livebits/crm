@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use kartik\widgets\Select2;
+use kartik\grid\GridView;
 
 $this->title = 'افزودن کارشناس به تیکت';
 /* @var $this yii\web\View */
@@ -56,6 +57,45 @@ $this->title = 'افزودن کارشناس به تیکت';
                     </div>
 
                     <?php ActiveForm::end(); ?>
+
+                    <hr>
+
+                    <?= GridView::widget([
+                        'dataProvider' => $dataProvider,
+                        'columns' => [
+                            ['class' => 'yii\grid\SerialColumn'],
+//                            'id',
+                            [
+                                "attribute" => 'username',
+                                'label' => 'نام کارشناس',
+                            ],
+                            [
+                                "attribute" => 'title',
+                                'label' => 'موضوع تیکت',
+                            ],
+                            [
+                                "attribute" => 'created_at',
+                                'label' => 'تاریخ ثبت',
+                                "value" => function($model) {
+                                    return \app\components\Jdf::jdate("Y/m/d", $model['created_at']);
+                                }
+                            ],
+                            [
+                                'class' => 'yii\grid\ActionColumn',
+                                'template' => '{delete}',
+                                'buttons' => [
+                                    'delete' => function ($url, $model, $key) {
+
+                                        $url = Yii::$app->urlManager->createUrl([
+                                            'ticket/delete-expert-ticket',
+                                            'id' => $model['id'],
+                                        ]);
+                                        return "<a href=". $url ." title='حذف'><i class='fa fa-trash'></i></a>";
+                                    }
+                                ]
+                            ],
+                        ],
+                    ]); ?>
 
                 </div>
             </div>

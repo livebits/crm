@@ -8,6 +8,8 @@ use app\models\User;
 use Yii;
 use app\models\Department;
 use app\models\DepartmentSearch;
+use yii\data\ActiveDataProvider;
+use yii\db\Query;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -144,15 +146,39 @@ class DepartmentController extends Controller
             $model->created_at = time();
             $model->save();
 
+            Log::addLog(Log::AddExpertToDepartment, $model->expert_id . '-' . $model->department_id);
+
             Yii::$app->session->setFlash('success', 'اطلاعات با موفقیت ذخیره شد');
         }
 
-        Log::addLog(Log::AddExpertToDepartment, $model->expert_id . '-' . $model->department_id);
+        $query = (new Query())
+            ->select(['expert_department.id', 'user.username', 'department.name', 'expert_department.created_at'])
+            ->from('expert_department')
+            ->leftJoin('user', 'user.id=expert_department.expert_id')
+            ->leftJoin('department', 'department.id=expert_department.department_id');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
 
         return $this->render('add-expert-department', [
+            'dataProvider' => $dataProvider,
             'model' => $model,
             'users' => $users,
             'departments' => $departments
         ]);
+    }
+
+    //remove expert from department
+    public function actionDeleteExpertDepartment($id) {
+
+        $expertDepartment = ExpertDepartment::find()->where('id='.$id)->one();
+
+        if($expertDepartment) {
+            $expertDepartment->delete();
+            return $this->redirect('add-expert-department');
+        }
+
+        throw new ForbiddenHttpException('شما اجازه دسترسی به این بخش را ندارید');
     }
 }

@@ -180,6 +180,16 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
         return false;
     }
 
+    public static function getRole($id) {
+        $query = (new \yii\db\Query())
+            ->select('item_name')
+            ->from('auth_assignment')
+            ->where("user_id = :user_id", [':user_id' => $id])
+            ->one();
+
+        return $query['item_name'];
+    }
+
     public static function is_in_role($id, $role)
     {
         if(Yii::$app->user->isSuperadmin)
