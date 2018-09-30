@@ -57,6 +57,14 @@ class TicketController extends Controller
      */
     public function actionIndex()
     {
+        $user = \webvimark\modules\UserManagement\models\User::getCurrentUser();
+        if(!$user::hasRole(['Admin'], $superAdminAllowed = true) && $user::hasRole(['expert'], $superAdminAllowed = false)) {
+            return $this->redirect(['ticket/expert-tickets']);
+        }
+        if(!Yii::$app->user->isSuperadmin && $user::hasRole(['Admin'], $superAdminAllowed = true)) {
+            return $this->redirect(['ticket/all-tickets']);
+        }
+
         $searchModel = new TicketSearch();
 
         $params = Yii::$app->request->queryParams;

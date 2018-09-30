@@ -77,6 +77,10 @@ class SiteController extends Controller
             return $this->redirect(['site/customer-dashboard']);
         }
 
+        if(!$user::hasRole(['Admin'], $superAdminAllowed = true) && $user::hasRole(['expert'], $superAdminAllowed = false)) {
+            return $this->redirect(['ticket/expert-tickets']);
+        }
+
         if(Yii::$app->user->isSuperadmin  || $user::hasRole(['Admin'], $superAdminAllowed = true)) {
             $customers = Customer::find()->all();
 

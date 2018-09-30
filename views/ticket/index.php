@@ -9,6 +9,7 @@ use kartik\grid\GridView;
 
 $this->title = 'تیکت ها';
 $this->params['breadcrumbs'][] = $this->title;
+$user_id = Yii::$app->user->id;
 ?>
 <div class="ticket-index">
 
@@ -21,7 +22,12 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="title_right" style="width: 100%;text-align: left;">
 
             <p>
-                <?= Html::a('ثبت تیکت جدید', ['create'], ['class' => 'btn btn-success']) ?>
+                <?php if(!\app\models\User::is_in_role($user_id, 'expert')) { ?>
+                    <?= Html::a('ثبت تیکت جدید', ['create'], ['class' => 'btn btn-success']) ?>
+
+                    <?php
+                }
+                ?>
             </p>
 
         </div>
@@ -44,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     <?php
                     $template = '';
-                    $user_id = Yii::$app->user->id;
+
                     if(\app\models\User::is_in_role($user_id, 'Admin')) {
                         $template = '{update} {view} {delete} {reply} {check} {close}';
 
