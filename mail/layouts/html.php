@@ -12,6 +12,44 @@ use yii\helpers\Html;
     <meta http-equiv="Content-Type" content="text/html; charset=<?= Yii::$app->charset ?>" />
     <title><?= Html::encode($this->title) ?></title>
     <?php $this->head() ?>
+    <style type="text/css">
+        table, tr, td {
+            border-collapse: collapse;
+            text-align: right;
+            width: 100%;
+        }
+
+        td {
+            /*border: #333333 solid 1px;*/
+            padding: 5px;
+            vertical-align: top;
+        }
+
+        td#title {
+            height: 40px;
+            background-color: #c7c7c7;
+            vertical-align: center;
+            width: 60%;
+            border-top-right-radius: 5px;
+        }
+
+        td#date {
+            height: 40px;
+            background-color: #c7c7c7;
+            vertical-align: center;
+            text-align: left;
+            width: 40%;
+            border-top-left-radius: 5px;
+        }
+
+        td#body {
+            height: 200px;
+            min-height: 100px;
+            background-color: #eeeeee;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+    </style>
 </head>
 <body>
     <?php $this->beginBody() ?>

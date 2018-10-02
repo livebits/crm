@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\Jdf;
 use app\models\Deal;
 use app\models\Department;
 use app\models\ExpertDepartment;
@@ -58,10 +59,10 @@ class TicketController extends Controller
     public function actionIndex()
     {
         $user = \webvimark\modules\UserManagement\models\User::getCurrentUser();
-        if(!$user::hasRole(['Admin'], $superAdminAllowed = true) && $user::hasRole(['expert'], $superAdminAllowed = false)) {
+        if (!$user::hasRole(['Admin'], $superAdminAllowed = true) && $user::hasRole(['expert'], $superAdminAllowed = false)) {
             return $this->redirect(['ticket/expert-tickets']);
         }
-        if(!Yii::$app->user->isSuperadmin && $user::hasRole(['Admin'], $superAdminAllowed = true)) {
+        if (!Yii::$app->user->isSuperadmin && $user::hasRole(['Admin'], $superAdminAllowed = true)) {
             return $this->redirect(['ticket/all-tickets']);
         }
 
@@ -180,6 +181,7 @@ class TicketController extends Controller
                 }
 
                 Log::addLog(Log::AddNewTicket, $model->id);
+                $this->sendToExpertsAndAdmins($model->id, $model->title, $model->body);
 
                 return $this->redirect(['view', 'id' => $model->id]);
             }
@@ -376,6 +378,12 @@ class TicketController extends Controller
 
                 Log::addLog(Log::ReplyTicket, $model->id . '-' . $model->status);
 
+                if (User::is_in_role(Yii::$app->user->id, 'customer')) {
+                    $this->sendReplyToExpertsAndAdmins($model->id, $model->title, $ticket->body);
+                } else {
+                    $this->sendReplyToCustomerAndAdmins($model->id, $model->title, $ticket->body);
+                }
+
                 Yii::$app->session->setFlash('success', 'پاسخ شما با موفقیت ذخیره شد');
             }
         }
@@ -415,6 +423,12 @@ class TicketController extends Controller
         Log::addLog(Log::CloseTicket, $model->id . '-' . $model->status);
 
         if (User::is_in_role(Yii::$app->user->id, 'customer')) {
+            $this->sendReplyToExpertsAndAdmins($model->id, "تیکت ({$model->title}) توسط مشتری بسته شد", $model->body, "تیکت ({$model->title}) توسط مشتری بسته شد");
+        } else {
+            $this->sendReplyToCustomerAndAdmins($model->id, "تیکت ({$model->title}) توسط کارشناس بسته شد", $model->body, "تیکت ({$model->title}) توسط کارشناس بسته شد");
+        }
+
+        if (User::is_in_role(Yii::$app->user->id, 'customer')) {
             return $this->redirect('index');
         } else {
             return $this->redirect('expert-tickets');
@@ -424,7 +438,8 @@ class TicketController extends Controller
     /*
      * Add user(expert) to one or more tickets
      */
-    public function actionAddExpertTicket() {
+    public function actionAddExpertTicket()
+    {
         $model = new ExpertTicket();
 
         $tickets = \yii\helpers\ArrayHelper::map(Ticket::find()->all(), 'id', 'title');
@@ -432,7 +447,7 @@ class TicketController extends Controller
         $users = User::findUsersByRole('expert');
         $users = \yii\helpers\ArrayHelper::map($users, 'id', 'username');
 
-        if(Yii::$app->request->isPost && $model->load(Yii::$app->request->post())){
+        if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
 
             $model->created_at = time();
             $model->save();
@@ -461,15 +476,133 @@ class TicketController extends Controller
     }
 
     //remove expert from ticket
-    public function actionDeleteExpertTicket($id) {
+    public function actionDeleteExpertTicket($id)
+    {
 
-        $expertTicket = ExpertTicket::find()->where('id='.$id)->one();
+        $expertTicket = ExpertTicket::find()->where('id=' . $id)->one();
 
-        if($expertTicket) {
+        if ($expertTicket) {
             $expertTicket->delete();
             return $this->redirect('add-expert-ticket');
         }
 
         throw new ForbiddenHttpException('شما اجازه دسترسی به این بخش را ندارید');
+    }
+
+    public function sendToExpertsAndAdmins($ticket_id, $title, $body)
+    {
+        $emails = [];
+        $experts = (new Query())
+            ->select('user.email')
+            ->from('ticket')
+            ->leftJoin('expert_department', 'expert_department.department_id = ticket.department')
+            ->leftJoin('user', 'user.id = expert_department.expert_id')
+            ->where('ticket.id=' . $ticket_id)
+            ->all();
+        foreach ($experts as $expert) {
+            if ($expert['email'] != '')
+                $emails[] = $expert['email'];
+        }
+
+        $admins = User::findUsersByRole('Admin');
+        foreach ($admins as $admin) {
+            if ($admin['email'] != '')
+                $emails[] = $admin['email'];
+        }
+
+        //remove repeated emails
+        $experts_admins_emails = [];
+        foreach ($emails as $email) {
+            if (!in_array($email, $experts_admins_emails)){
+                $experts_admins_emails[] = $email;
+            }
+        }
+
+        $this->sendEmail($experts_admins_emails, 'ارسال تیکت جدید', $title, $body);
+    }
+
+    public function sendReplyToCustomerAndAdmins($ticket_id, $title, $body, $subject = null)
+    {
+        $emails = [];
+        $customer = (new Query())
+            ->select('user.email')
+            ->from('ticket')
+            ->leftJoin('user', 'user.id = ticket.user_id')
+            ->where('ticket.id=' . $ticket_id)
+            ->one();
+
+        if ($customer['email'] != '')
+            $emails[] = $customer['email'];
+
+        $admins = User::findUsersByRole('Admin');
+        foreach ($admins as $admin) {
+            if ($admin['email'] != '')
+                $emails[] = $admin['email'];
+        }
+
+        //remove repeated emails
+        $customer_admins_emails = [];
+        foreach ($emails as $email) {
+            if (!in_array($email, $customer_admins_emails)){
+                $customer_admins_emails[] = $email;
+            }
+        }
+
+        if(!isset($subject)) {
+            $subject = 'پاسخ کارشناس به تیکت';
+        }
+        $this->sendEmail($customer_admins_emails, $subject, $title, $body);
+    }
+
+    public function sendReplyToExpertsAndAdmins($ticket_id, $title, $body, $subject = null)
+    {
+        $emails = [];
+        $experts = (new Query())
+            ->select('user.email')
+            ->from('ticket')
+            ->leftJoin('expert_department', 'expert_department.department_id = ticket.department')
+            ->leftJoin('user', 'user.id = expert_department.expert_id')
+            ->where('ticket.id=' . $ticket_id)
+            ->all();
+        foreach ($experts as $expert) {
+            if ($expert['email'] != '')
+                $emails[] = $expert['email'];
+        }
+
+        $admins = User::findUsersByRole('Admin');
+        foreach ($admins as $admin) {
+            if ($admin['email'] != '')
+                $emails[] = $admin['email'];
+        }
+
+        //remove repeated emails
+        $experts_admins_emails = [];
+        foreach ($emails as $email) {
+            if (!in_array($email, $experts_admins_emails)){
+                $experts_admins_emails[] = $email;
+            }
+        }
+
+        if(!isset($subject)) {
+            $subject = 'پاسخ مشتری به تیکت';
+        }
+        $this->sendEmail($experts_admins_emails, $subject, $title, $body);
+    }
+
+    public function sendEmail($emails, $subject, $title, $message)
+    {
+        $messages = [];
+        foreach ($emails as $email) {
+            $messages[] = Yii::$app->mailer->compose('mail', [
+                'subject' => $title,
+                'body'    => $message,
+                'date'    => Jdf::jdate('Y/m/d H:i:s', time())
+            ])
+                ->setFrom('info@akaf.ir')
+                ->setSubject($subject)
+                ->setTo($email);
+        }
+
+        Yii::$app->mailer->sendMultiple($messages);
     }
 }
