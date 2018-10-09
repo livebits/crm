@@ -585,10 +585,12 @@ class SiteController extends Controller
 
     public function actionCustomerDashboard() {
 
-        $user = User::getCurrentUser();
         $all_tickets = $done_tickets = $in_progress_tickets = $waiting_tickets = $dept_amount = $current_deals = 0;
 
-        $all_tickets = Ticket::find()->where('user_id=' . Yii::$app->user->id)->count();
+        $all_tickets = Ticket::find()
+            ->where('user_id=' . Yii::$app->user->id)
+            ->andWhere('reply_to IS NULL')
+            ->count();
         $done_tickets = Ticket::find()
             ->where('user_id=' . Yii::$app->user->id)
             ->andWhere('status=' . Ticket::CLOSED)

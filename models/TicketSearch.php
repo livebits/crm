@@ -44,9 +44,15 @@ class TicketSearch extends Ticket
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $departments = null, $tickets_id = null)
+    public function search($params, $departments = null, $tickets_id = null, $fromApi = false)
     {
-        $query = $this::find()
+        if($fromApi) {
+            $queryObj = new Query();
+        } else {
+            $queryObj = $this::find();
+        }
+
+        $query = $queryObj
             ->select(['ticket.*', 'department.name as department_name', 'deal.subject as deal_subject'])
             ->from('ticket')
             ->leftJoin('deal', 'deal.id=ticket.deal_id')

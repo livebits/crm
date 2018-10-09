@@ -2,12 +2,15 @@
 
 namespace app\modules\api\controllers;
 
+use app\components\Jdf;
+use Yii;
 use app\components\ApiComponent;
 use app\models\Customer;
 use app\models\CustomerSearch;
 use app\models\Deal;
 use app\models\DealSearch;
 use app\models\Meeting;
+use app\models\UserDeal;
 use webvimark\modules\UserManagement\models\User;
 use yii\data\ArrayDataProvider;
 use yii\db\Query;
@@ -131,20 +134,34 @@ class DealController extends \yii\rest\Controller
      */
     public function actionCustomerDeals()
     {
-        $request = ApiComponent::parseInputData();
-
-        if (isset($request['customer_id'])) {
-            $searchModel = new DealSearch();
-            $query = $searchModel->search(\Yii::$app->request->queryParams, $request['customer_id'], true);
-
-            $dataProvider = new ArrayDataProvider([
-                'allModels' => $query->asArray()->all(),
-            ]);
-
-            return ApiComponent::successResponse('', $dataProvider->allModels, true);
-        } else {
-            return ApiComponent::errorResponse([], 1000);
+        $user_deals = UserDeal::find()->select('deal_id')->where('user_id=' . Yii::$app->user->id)->all();
+        $user_deals_id = [];
+        $user_deals_id[] = -1;
+        foreach ($user_deals as $user_deal) {
+            $user_deals_id[] = $user_deal->deal_id;
         }
+
+        $searchModel = new DealSearch();
+        $dataProvider = $searchModel->searchUserDeals(Yii::$app->request->queryParams, $user_deals_id, true);
+
+        $data = $dataProvider->getModels();
+        $index = 0;
+        foreach ($data as $deal) {
+            $deal['created_at'] = Jdf::jdate('Y/m/d H:i', $deal['created_at']);
+            $data[$index++] = $deal;
+        }
+
+        $page = $dataProvider->pagination->page + 1;
+        $page_size = $dataProvider->pagination->pageSize;
+        $pages = ceil($dataProvider->getTotalCount() / $page_size);
+
+        return ApiComponent::successResponse('Customer deals list', [
+            'data' => $data,
+            'page' => $page,
+            'page_size' => $page_size,
+            'pages' => $pages
+        ], true);
+
     }
 
     /**

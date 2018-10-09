@@ -181,7 +181,7 @@ class TicketController extends Controller
                 }
 
                 Log::addLog(Log::AddNewTicket, $model->id);
-                $this->sendToExpertsAndAdmins($model->id, $model->title, $model->body);
+                TicketController::sendToExpertsAndAdmins($model->id, $model->title, $model->body);
 
                 return $this->redirect(['view', 'id' => $model->id]);
             }
@@ -379,9 +379,9 @@ class TicketController extends Controller
                 Log::addLog(Log::ReplyTicket, $model->id . '-' . $model->status);
 
                 if (User::is_in_role(Yii::$app->user->id, 'customer')) {
-                    $this->sendReplyToExpertsAndAdmins($model->id, $model->title, $ticket->body);
+                    TicketController::sendReplyToExpertsAndAdmins($model->id, $model->title, $ticket->body);
                 } else {
-                    $this->sendReplyToCustomerAndAdmins($model->id, $model->title, $ticket->body);
+                    TicketController::sendReplyToCustomerAndAdmins($model->id, $model->title, $ticket->body);
                 }
 
                 Yii::$app->session->setFlash('success', 'پاسخ شما با موفقیت ذخیره شد');
@@ -407,6 +407,7 @@ class TicketController extends Controller
     {
         $model = $this->findModel(intval($id));
         $model->status = Ticket::PENDING;
+        $model->updated_at = time();
         $model->save();
 
         Log::addLog(Log::CheckTicket, $model->id . '-' . $model->status);
@@ -418,14 +419,15 @@ class TicketController extends Controller
     {
         $model = $this->findModel(intval($id));
         $model->status = Ticket::CLOSED;
+        $model->updated_at = time();
         $model->save();
 
         Log::addLog(Log::CloseTicket, $model->id . '-' . $model->status);
 
         if (User::is_in_role(Yii::$app->user->id, 'customer')) {
-            $this->sendReplyToExpertsAndAdmins($model->id, "تیکت ({$model->title}) توسط مشتری بسته شد", $model->body, "تیکت ({$model->title}) توسط مشتری بسته شد");
+            TicketController::sendReplyToExpertsAndAdmins($model->id, "تیکت ({$model->title}) توسط مشتری بسته شد", $model->body, "تیکت ({$model->title}) توسط مشتری بسته شد");
         } else {
-            $this->sendReplyToCustomerAndAdmins($model->id, "تیکت ({$model->title}) توسط کارشناس بسته شد", $model->body, "تیکت ({$model->title}) توسط کارشناس بسته شد");
+            TicketController::sendReplyToCustomerAndAdmins($model->id, "تیکت ({$model->title}) توسط کارشناس بسته شد", $model->body, "تیکت ({$model->title}) توسط کارشناس بسته شد");
         }
 
         if (User::is_in_role(Yii::$app->user->id, 'customer')) {
@@ -489,7 +491,7 @@ class TicketController extends Controller
         throw new ForbiddenHttpException('شما اجازه دسترسی به این بخش را ندارید');
     }
 
-    public function sendToExpertsAndAdmins($ticket_id, $title, $body)
+    public static function sendToExpertsAndAdmins($ticket_id, $title, $body)
     {
         $emails = [];
         $experts = (new Query())
@@ -518,10 +520,10 @@ class TicketController extends Controller
             }
         }
 
-        $this->sendEmail($experts_admins_emails, 'ارسال تیکت جدید', $title, $body);
+        TicketController::sendEmail($experts_admins_emails, 'ارسال تیکت جدید', $title, $body);
     }
 
-    public function sendReplyToCustomerAndAdmins($ticket_id, $title, $body, $subject = null)
+    public static function sendReplyToCustomerAndAdmins($ticket_id, $title, $body, $subject = null)
     {
         $emails = [];
         $customer = (new Query())
@@ -551,10 +553,10 @@ class TicketController extends Controller
         if(!isset($subject)) {
             $subject = 'پاسخ کارشناس به تیکت';
         }
-        $this->sendEmail($customer_admins_emails, $subject, $title, $body);
+        TicketController::sendEmail($customer_admins_emails, $subject, $title, $body);
     }
 
-    public function sendReplyToExpertsAndAdmins($ticket_id, $title, $body, $subject = null)
+    public static function sendReplyToExpertsAndAdmins($ticket_id, $title, $body, $subject = null)
     {
         $emails = [];
         $experts = (new Query())
@@ -586,10 +588,10 @@ class TicketController extends Controller
         if(!isset($subject)) {
             $subject = 'پاسخ مشتری به تیکت';
         }
-        $this->sendEmail($experts_admins_emails, $subject, $title, $body);
+        TicketController::sendEmail($experts_admins_emails, $subject, $title, $body);
     }
 
-    public function sendEmail($emails, $subject, $title, $message)
+    public static function sendEmail($emails, $subject, $title, $message)
     {
         $messages = [];
         foreach ($emails as $email) {

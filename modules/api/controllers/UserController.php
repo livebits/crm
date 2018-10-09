@@ -101,8 +101,10 @@ class UserController extends \yii\rest\Controller
             $user = User::findByUsername($request['username']);
             if(isset($user) && \Yii::$app->getSecurity()->validatePassword($request['password'], $user->password_hash)) {
                 $data = [];
+                $data['info'] = $user;
                 $data['token'] = $user->auth_key;
-                return ApiComponent::successResponse('', $data);
+                $data['role'] = \app\models\User::getRole($user->id);
+                return ApiComponent::successResponse('', $data, true);
 
             } else {
                 return ApiComponent::errorResponse([], 1001);

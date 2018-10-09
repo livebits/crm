@@ -7,6 +7,7 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Deal;
 use webvimark\modules\UserManagement\models\User;
+use yii\db\Query;
 
 /**
  * DealSearch represents the model behind the search form of `app\models\Deal`.
@@ -164,9 +165,14 @@ class DealSearch extends Deal
         }
     }
 
-    public function searchUserDeals($params, $user_deals_id)
+    public function searchUserDeals($params, $user_deals_id, $fromApi = false)
     {
-        $query = $this::find()
+        if($fromApi){
+            $query = new Query();
+        } else {
+            $query = $this::find();
+        }
+        $query = $query
             ->select(['deal.*', 'cu.id as customerName', 'cu.firstName', 'cu.lastName', 'cu.mobile', 'deal_level.level_name as levelName',
                 'SUM(m.rating) as sum_rating', 'MAX(m.created_at) as latestMeeting',
                 'MAX(m.next_date) as nextMeeting', 'COUNT(m.id) as meetingCount'])

@@ -2,10 +2,16 @@
 
 namespace app\modules\api\controllers;
 
+use app\models\ExpertDepartment;
+use app\models\ExpertTicket;
+use app\models\TicketSearch;
+use app\models\UserDeal;
+use Yii;
 use app\components\ApiComponent;
 use app\models\Customer;
 use app\models\Deal;
 use app\models\Meeting;
+use app\models\Ticket;
 use webvimark\modules\UserManagement\models\User;
 use yii\db\Query;
 use yii\filters\auth\CompositeAuth;
@@ -206,4 +212,74 @@ class InfoController extends \yii\rest\Controller
         return ApiComponent::successResponse('', $data);
     }
 
+    public function actionCustomerStats()
+    {
+        $all_tickets = $done_tickets = $in_progress_tickets = $waiting_tickets = $dept_amount = $current_deals = 0;
+
+        $all_tickets = Ticket::find()
+            ->where('user_id=' . Yii::$app->user->id)
+            ->andWhere('reply_to IS NULL')
+            ->count();
+        $done_tickets = Ticket::find()
+            ->where('user_id=' . Yii::$app->user->id)
+            ->andWhere('status=' . Ticket::CLOSED)
+            ->count();
+        $in_progress_tickets = $all_tickets - $done_tickets;
+        $waiting_tickets = Ticket::find()
+            ->where('user_id=' . Yii::$app->user->id)
+            ->andWhere('status=' . Ticket::NEED_CUSTOMER_REPLY)
+            ->count();
+        $current_deals = UserDeal::find()
+            ->where('user_id=' . Yii::$app->user->id)
+            ->count();
+
+        $data = [
+            'all_tickets' => $all_tickets,
+            'done_tickets' => $done_tickets,
+            'in_progress_tickets' => $in_progress_tickets,
+            'waiting_tickets' => $waiting_tickets,
+            'dept_amount' => $dept_amount,
+            'current_deals' => $current_deals,
+        ];
+
+        return ApiComponent::successResponse('', $data, true);
+    }
+
+    public function actionExpertStats()
+    {
+        $searchModel = new TicketSearch();
+
+        $params = Yii::$app->request->queryParams;
+
+        //find expert department
+        $expertDeps = ExpertDepartment::find()
+            ->select('department_id')
+            ->where('expert_id=' . Yii::$app->user->id)
+            ->asArray()
+            ->all();
+        $deps = [];
+        $deps[] = -1;
+        foreach ($expertDeps as $expertDep) {
+            $deps[] = intval($expertDep['department_id']);
+        }
+
+        //expert tickets
+        $expertTickets = ExpertTicket::find()
+            ->select('ticket_id')
+            ->where('expert_id=' . Yii::$app->user->id)
+            ->asArray()
+            ->all();
+        $tickets_id = [];
+        $tickets_id[] = -1;
+        foreach ($expertTickets as $expertTicket) {
+            $tickets_id[] = intval($expertTicket['ticket_id']);
+        }
+        $dataProvider = $searchModel->search($params, $deps, $tickets_id);
+
+        $data = [
+            'all_tickets' => $dataProvider->getTotalCount()
+        ];
+
+        return ApiComponent::successResponse('', $data, true);
+    }
 }
