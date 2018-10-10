@@ -7,6 +7,7 @@ use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBasicAuth;
 use yii\filters\auth\HttpBearerAuth;
 use yii\filters\auth\QueryParamAuth;
+use yii\filters\Cors;
 
 /**
  * api module definition class
@@ -17,6 +18,24 @@ class Module extends \yii\base\Module
      * @inheritdoc
      */
     public $controllerNamespace = 'app\modules\api\controllers';
+
+    private $_verbs = ['POST', 'GET', 'OPTIONS'];
+
+    public function actions()
+    {
+        return [
+            'options' => [
+                'class' => 'yii\rest\OptionsAction',
+                'collectionOptions' =>  $this->_verbs,
+                'resourceOptions' =>  $this->_verbs
+            ]
+        ];
+    }
+
+    public function actionOptions()
+    {
+        Yii::$app->getResponse()->getHeaders()->set('Allow', implode(', ', $this->_verbs));
+    }
 
     public function beforeAction($action)
     {
@@ -31,7 +50,16 @@ class Module extends \yii\base\Module
     {
         return [
             $behaviors['corsFilter'] = [
-                'class' => \CorsCustom::className(),
+                'class' => Cors::className(),
+                'cors' => [
+                    'Origin' => ['*'],
+                    'Access-Control-Expose-Headers' => [
+                        'X-Pagination-Per-Page',
+                        'X-Pagination-Total-Count',
+                        'X-Pagination-Current-Page',
+                        'X-Pagination-Page-Count',
+                    ],
+                ],
             ]
         ];
     }
