@@ -32,7 +32,7 @@ class UserController extends AdminDefaultController
 
 		if ( $model->load(Yii::$app->request->post()) && $model->save() )
 		{
-            User::assignRole($model->id, 'employee');
+            User::assignRole($model->id, 'customer');
 			return $this->redirect(['view',	'id' => $model->id]);
 		}
 

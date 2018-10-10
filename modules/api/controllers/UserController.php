@@ -2,12 +2,16 @@
 
 namespace app\modules\api\controllers;
 
+use app\models\UserProfile;
+use Yii;
 use app\components\ApiComponent;
+use app\models\RegistrationFormWithProfile;
 use webvimark\modules\UserManagement\models\User;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBearerAuth;
 use yii\filters\ContentNegotiator;
 use yii\web\Response;
+use yii\widgets\ActiveForm;
 
 class UserController extends \yii\rest\Controller
 {
@@ -27,7 +31,7 @@ class UserController extends \yii\rest\Controller
         ];
         $behaviors['authenticator'] = [
             'class' => CompositeAuth::className(),
-            'except' => ['login'],
+            'except' => ['login', 'registration'],
             'authMethods' => [
                 HttpBearerAuth::className(),
             ],
@@ -109,6 +113,49 @@ class UserController extends \yii\rest\Controller
             } else {
                 return ApiComponent::errorResponse([], 1001);
             }
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+        }
+    }
+
+    public function actionRegistration() {
+        $request = ApiComponent::parseInputData();
+
+        if(isset($request['username']) && isset($request['password']) && isset($request['email'])
+        && isset($request['repeat_password']) && isset($request['firstName']) && isset($request['lastName'])){
+
+//            $model = new RegistrationFormWithProfile();
+//            $requestModified = ["RegistrationFormWithProfile" => $request];
+//
+//            if ( $model->load($requestModified) AND $model->validate() )
+//            {
+                $userModel = new User(['scenario'=>'newUser']);
+
+                $requestModified = ["User" => $request];
+                if ( $userModel->load($requestModified) && $userModel->save())
+                {
+//                    User::updateAll(['email' => $request['email']], ['id' => $user->id]);
+
+                    $roles = ['customer'];
+                    foreach ($roles as $role)
+                    {
+                        User::assignRole($userModel->id, $role);
+                    }
+
+                    //save profile
+                    $model = new UserProfile();
+                    $model->user_id = $userModel->id;
+                    $model->firstName = $request['firstName'];
+                    $model->lastName = $request['lastName'];
+                    $model->save(false);
+
+                    return ApiComponent::successResponse('user created successfully', $userModel, true);
+                }
+
+                return ApiComponent::errorResponse($userModel->getErrors(), 400);
+//            }
+//
+//            return ApiComponent::errorResponse($model->getErrors(), 400);
         } else {
             return ApiComponent::errorResponse([], 1000);
         }

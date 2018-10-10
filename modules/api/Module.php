@@ -30,9 +30,22 @@ class Module extends \yii\base\Module
     public function behaviors()
     {
         return [
-            'corsFilter' => [
+            $behaviors['corsFilter'] = [
                 'class' => \yii\filters\Cors::className(),
-            ],
+                'cors' => [
+                    // restrict access to
+                    'Origin' => ['*'],
+                    'Access-Control-Request-Method' => ['GET', 'POST', 'OPTIONS', '*'],
+                    // Allow only POST and PUT methods
+                    'Access-Control-Request-Headers' => ['*'],
+                    // Allow only headers 'X-Wsse'
+                    'Access-Control-Allow-Credentials' => null,
+                    // Allow OPTIONS caching
+                    'Access-Control-Max-Age' => 86400,
+                    // Allow the X-Pagination-Current-Page header to be exposed to the browser.
+                    'Access-Control-Expose-Headers' => ['Authorization'],
+                ],
+            ]
         ];
     }
 

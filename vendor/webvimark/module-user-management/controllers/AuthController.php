@@ -122,7 +122,6 @@ class AuthController extends BaseController
 
 		$model = new $this->module->registrationFormClass;
 
-
 		if ( Yii::$app->request->isAjax AND $model->load(Yii::$app->request->post()) )
 		{
 
