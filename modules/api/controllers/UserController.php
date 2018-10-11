@@ -9,6 +9,7 @@ use app\models\RegistrationFormWithProfile;
 use webvimark\modules\UserManagement\models\User;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBearerAuth;
+use yii\filters\auth\QueryParamAuth;
 use yii\filters\ContentNegotiator;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
@@ -34,6 +35,7 @@ class UserController extends \yii\rest\Controller
             'except' => ['login', 'registration'],
             'authMethods' => [
                 HttpBearerAuth::className(),
+                QueryParamAuth::className(),
             ],
         ];
 

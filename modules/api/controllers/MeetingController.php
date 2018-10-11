@@ -11,6 +11,7 @@ use app\models\MeetingSearch;
 use yii\data\ArrayDataProvider;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBearerAuth;
+use yii\filters\auth\QueryParamAuth;
 use yii\filters\ContentNegotiator;
 use yii\web\Response;
 
@@ -30,6 +31,7 @@ class MeetingController extends \yii\rest\Controller
             'class' => CompositeAuth::className(),
             'authMethods' => [
                 HttpBearerAuth::className(),
+                QueryParamAuth::className(),
             ],
         ];
 
