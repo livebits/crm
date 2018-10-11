@@ -53,7 +53,7 @@ return [
     'Inactive' => 'غیر فعال',
     'IP' => '',
     'Language' => 'زبان',
-    'Login' => '',
+    'Login' => 'نام کاربری',
     'Name' => '',
     'OS' => 'سیستم عامل',
     'Password' => 'کلمه عبور',
