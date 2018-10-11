@@ -16,6 +16,7 @@ use webvimark\modules\UserManagement\models\User;
 use yii\db\Query;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBearerAuth;
+use yii\filters\auth\QueryParamAuth;
 use yii\filters\ContentNegotiator;
 use yii\web\Response;
 
@@ -39,6 +40,7 @@ class InfoController extends \yii\rest\Controller
             'class' => CompositeAuth::className(),
             'authMethods' => [
                 HttpBearerAuth::className(),
+                QueryParamAuth::className(),
             ],
         ];
 

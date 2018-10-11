@@ -19,24 +19,6 @@ class Module extends \yii\base\Module
      */
     public $controllerNamespace = 'app\modules\api\controllers';
 
-    private $_verbs = ['POST', 'GET', 'OPTIONS'];
-
-    public function actions()
-    {
-        return [
-            'options' => [
-                'class' => 'yii\rest\OptionsAction',
-                'collectionOptions' =>  $this->_verbs,
-                'resourceOptions' =>  $this->_verbs
-            ]
-        ];
-    }
-
-    public function actionOptions()
-    {
-        Yii::$app->getResponse()->getHeaders()->set('Allow', implode(', ', $this->_verbs));
-    }
-
     public function beforeAction($action)
     {
         header('Access-Control-Allow-Origin: *');
@@ -54,10 +36,8 @@ class Module extends \yii\base\Module
                 'cors' => [
                     'Origin' => ['*'],
                     'Access-Control-Expose-Headers' => [
-                        'X-Pagination-Per-Page',
-                        'X-Pagination-Total-Count',
-                        'X-Pagination-Current-Page',
-                        'X-Pagination-Page-Count',
+                        'Authorization',
+                        'Content-Type',
                     ],
                 ],
             ]
