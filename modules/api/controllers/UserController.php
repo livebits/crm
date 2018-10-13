@@ -109,7 +109,7 @@ class UserController extends \yii\rest\Controller
                 $data = [];
                 $data['info'] = $user;
                 $data['token'] = $user->auth_key;
-                $data['role'] = \app\models\User::getRole($user->id);
+                $data['role'] = $user->superadmin ? 'admin' : strtolower(\app\models\User::getRole($user->id));
                 return ApiComponent::successResponse('', $data, true);
 
             } else {

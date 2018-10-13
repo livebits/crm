@@ -151,6 +151,41 @@ class TicketController extends \yii\rest\Controller
 //        }
     }
 
+    public function actionAdminTickets()
+    {
+
+        //        $request = ApiComponent::parseInputData();
+
+//        if (isset($request['ticket_id'])) {
+
+        $searchModel = new TicketSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, null, null, true);
+
+        $data = $dataProvider->getModels();
+        $index = 0;
+        foreach ($data as $ticket) {
+            $ticket['status'] = Ticket::ticketStatus($ticket['status']);
+            $ticket['created_at'] = Jdf::jdate('Y/m/d H:i', $ticket['created_at']);
+            $data[$index++] = $ticket;
+        }
+
+        $page = $dataProvider->pagination->page + 1;
+        $page_size = $dataProvider->pagination->pageSize;
+        $pages = ceil($dataProvider->getTotalCount() / $page_size);
+
+        return ApiComponent::successResponse('Tickets list', [
+            'data' => $data,
+            'page' => $page,
+            'page_size' => $page_size,
+            'pages' => $pages
+        ], true);
+
+//        } else {
+//            return ApiComponent::errorResponse([], 1000);
+//
+//        }
+    }
+
     public function actionGetCustomerDepAndDeals()
     {
         $user_deals = \yii\helpers\ArrayHelper::map(
