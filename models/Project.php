@@ -45,7 +45,7 @@ class Project extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'title' => 'عنوان پروژه',
-            'programming_lang' => 'زیان برنامه نویسی',
+            'programming_lang' => 'زبان برنامه نویسی',
             'description' => 'توضیحات',
             'created_at' => 'تاریخ ثبت',
             'updated_at' => 'تاریخ بروزرسانی',

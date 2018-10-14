@@ -6,11 +6,12 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\models\ProjectInfo */
 
-$project_name = (\app\models\Project::find()
+$project = (new \yii\db\Query())
+    ->from('project')
     ->select('title')
     ->where('id='. $model->project_id)
-    ->one())
-    ->title;
+    ->one();
+$project_name = $project['title'];
 
 $this->title = 'مشاهده اطلاعات پروژه: ' . $project_name;
 $this->params['breadcrumbs'][] = ['label' => 'Project Infos', 'url' => ['index']];
