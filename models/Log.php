@@ -27,6 +27,7 @@ class Log extends \yii\db\ActiveRecord
     const ReplyTicket = 'reply_ticket';
     const CheckTicket = 'check_ticket';
     const CloseTicket = 'close_ticket';
+    const AddProjectForExpert = 'add_project_for_expert';
 
     ////
 
