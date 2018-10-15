@@ -36,7 +36,14 @@ class ProjectInfoController extends Controller
     public function actionIndex()
     {
         $searchModel = new ProjectInfoSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        $user = \webvimark\modules\UserManagement\models\User::getCurrentUser();
+        $params = Yii::$app->request->queryParams;
+        if (!$user::hasRole(['Admin'], $superAdminAllowed = true) && $user::hasRole(['expert'], $superAdminAllowed = false)) {
+            $params['ProjectInfoSearch']['user_id'] = Yii::$app->user->id . '';
+        }
+
+        $dataProvider = $searchModel->search($params);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -168,11 +175,11 @@ class ProjectInfoController extends Controller
                 'key_alias_password' => $model->key_alias_password,
             ];
 
-            if($sign_file_name != '') {
+            if ($sign_file_name != '') {
                 $update_arr['sign_file'] = $sign_file_name;
             }
 
-            if($keystore_file_name != '') {
+            if ($keystore_file_name != '') {
                 $update_arr['keystore'] = $keystore_file_name;
             }
 

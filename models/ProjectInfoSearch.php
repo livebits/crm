@@ -58,6 +58,10 @@ class ProjectInfoSearch extends ProjectInfo
 //            return $dataProvider;
 //        }
 
+        if(isset($params['ProjectInfoSearch']['user_id'])) {
+            $query->andWhere(['user_id' => $params['ProjectInfoSearch']['user_id']]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'project_info.id' => $this->id,
