@@ -215,7 +215,7 @@ class TicketController extends Controller
             $otherFileIds = $request->post('mediaFiles');
 
             $model->updated_at = time();
-            $model->status = Ticket::NOT_CHECKED;
+//            $model->status = Ticket::NOT_CHECKED;
 
             if ($model->save()) {
 
