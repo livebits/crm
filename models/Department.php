@@ -34,6 +34,26 @@ class Department extends \yii\db\ActiveRecord
     }
 
     /**
+     * @inheritdoc
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+
+            if($this->isNewRecord) {
+                $this->created_at = time();
+
+            } else {
+                $this->updated_at = time();
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function attributeLabels()

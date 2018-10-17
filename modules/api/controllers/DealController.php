@@ -3,6 +3,7 @@
 namespace app\modules\api\controllers;
 
 use app\components\Jdf;
+use app\models\Log;
 use Yii;
 use app\components\ApiComponent;
 use app\models\Customer;
@@ -12,6 +13,7 @@ use app\models\DealSearch;
 use app\models\Meeting;
 use app\models\UserDeal;
 use webvimark\modules\UserManagement\models\User;
+use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
 use yii\db\Query;
 use yii\filters\auth\CompositeAuth;
@@ -253,4 +255,93 @@ class DealController extends \yii\rest\Controller
         return ApiComponent::successResponse('', $dataProvider->allModels, true);
     }
 
+    public function actionCustomersInDeals() {
+
+        $deals = \yii\helpers\ArrayHelper::map(Deal::find()->all(), 'id', 'subject');
+
+        $users = \app\models\User::findUsersByRole('customer');
+        $users = \yii\helpers\ArrayHelper::map($users, 'id', 'username');
+
+        $query = (new Query())
+            ->select(['user_deal.id', 'user.username', 'deal.subject', 'user_deal.created_at'])
+            ->from('user_deal')
+            ->leftJoin('user', 'user.id=user_deal.user_id')
+            ->leftJoin('deal', 'deal.id=user_deal.deal_id');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        $data = $dataProvider->getModels();
+        $index = 0;
+        foreach ($data as $userDeal) {
+            $userDeal['created_at'] = Jdf::jdate('Y/m/d H:i', $userDeal['created_at']);
+            $data[$index++] = $userDeal;
+        }
+        $page = $dataProvider->pagination->page + 1;
+        $page_size = $dataProvider->pagination->pageSize;
+        $pages = ceil($dataProvider->getTotalCount() / $page_size);
+
+        $list = [
+            'data' => $data,
+            'page' => $page,
+            'page_size' => $page_size,
+            'pages' => $pages
+        ];
+
+        $resultData = [
+            'customerDeals' => $list,
+            'deals' => $deals,
+            'customers' => $users,
+        ];
+
+        return ApiComponent::successResponse('Customer deals list', [
+            'data' => $resultData,
+        ], true);
+    }
+
+    public function actionAddCustomerToDeal() {
+        $request = ApiComponent::parseInputData();
+
+        if (isset($request['customer_id']) && isset($request['deal_id'])) {
+            $model = new UserDeal();
+            $model->user_id = $request['customer_id'];
+            $model->deal_id = $request['deal_id'];
+            $model->created_at = time();
+            $model->save();
+
+            Log::addLog(Log::AddUserToDeal, $model->user_id . '-' . $model->deal_id);
+
+            return ApiComponent::successResponse('Customer added to Deal successfully', [
+                $model,
+            ], true);
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+
+        }
+    }
+
+    //remove customer from deal
+    public function actionDeleteCustomerFromDeal() {
+        $request = ApiComponent::parseInputData();
+
+        if (isset($request['id'])) {
+            $customerDeal = UserDeal::find()->where('id='.$request['id'])->one();
+
+            if($customerDeal) {
+                $customerDeal->delete();
+                return ApiComponent::successResponse('customer deleted from Deal successfully', [
+                    $customerDeal,
+                ], true);
+            } else {
+                return ApiComponent::errorResponse([], 1002);
+
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+
+        }
+    }
 }
