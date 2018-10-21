@@ -3,6 +3,8 @@
 namespace app\modules\api\controllers;
 
 use app\components\Jdf;
+use app\models\DealEvent;
+use app\models\EventSearch;
 use app\models\Log;
 use Yii;
 use app\components\ApiComponent;
@@ -43,6 +45,135 @@ class DealController extends \yii\rest\Controller
         ];
 
         return $behaviors;
+    }
+
+    public function actionGetDeal() {
+        $request = ApiComponent::parseInputData();
+
+        if (isset($request['id'])) {
+            $deals = (new Query())
+                ->select(['deal.subject', 'deal.level', 'deal.created_at',
+                    'event.id as event_id', 'event.name as event_name',
+                    'deal_event.id as deal_event_id', 'deal_event.value as event_date', 'deal_event.business_day'])
+                ->from('deal')
+                ->leftJoin('deal_event', 'deal_event.deal_id = deal.id')
+                ->leftJoin('event', 'event.id = deal_event.event_id')
+                ->where('deal.id=' . $request['id'])
+                ->orderBy('event.id')
+                ->all();
+
+            if($deals) {
+
+                $data = [
+                    'subject' => $deals[0]['subject'],
+                    'level' => $deals[0]['level'],
+                    'created_at' => Jdf::jdate('Y/m/d H:i', $deals[0]['created_at']),
+                ];
+
+                $deal_events = [];
+                foreach ($deals as $deal) {
+                    if($deal['event_name']) {
+                        $deal_events[] = [
+                            "deal_event_id" => $deal['deal_event_id'],
+                            "event_id" => $deal['event_id'],
+                            "event_name" => $deal['event_name'],
+                            "event_date" => Jdf::jdate('F Y', $deal['event_date']),
+                            "event_full_date" => $deal['event_date'],
+                            "business_day" => $deal['business_day']
+                        ];
+                    }
+                }
+                $data['events'] = $deal_events;
+
+                return ApiComponent::successResponse('Return requested deal info',
+                    $data, true);
+            } else {
+                return ApiComponent::errorResponse([], 1002);
+
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+
+        }
+    }
+
+    public function actionAddDealEvent() {
+        $request = ApiComponent::parseInputData();
+
+        if (isset($request['event_id']) && isset($request['date'])
+            && isset($request['deal_id']) && isset($request['business_day'])) {
+
+            $deal = Deal::find()->where('id=' . $request['deal_id'])->one();
+
+            if($deal) {
+
+                $newDealEvent = new DealEvent();
+                $newDealEvent->deal_id = $request['deal_id'];
+                $newDealEvent->event_id = $request['event_id'];
+                $newDealEvent->value = $request['date'];
+                $newDealEvent->user_id = Yii::$app->user->id;
+                $newDealEvent->business_day = $request['business_day'];
+                $newDealEvent->save();
+
+                return ApiComponent::successResponse('Event added to Deal successfully', $newDealEvent, false);
+            } else {
+                return ApiComponent::errorResponse([], 1002);
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+
+        }
+    }
+
+    public function actionEditDealEvent() {
+        $request = ApiComponent::parseInputData();
+
+        if (isset($request['deal_event_id']) && isset($request['event_id']) && isset($request['date']) && isset($request['business_day'])) {
+
+            $dealEvent = DealEvent::find()->where('id=' . $request['deal_event_id'])->one();
+
+            if($dealEvent) {
+
+                DealEvent::updateAll([
+                    'event_id' => $request['event_id'],
+                    'value' => $request['date'],
+                    'business_day' => $request['business_day'],
+
+                ],['id' => $request['deal_event_id']]);
+
+                return ApiComponent::successResponse('Deal Event updated successfully', $dealEvent, false);
+            } else {
+                return ApiComponent::errorResponse([], 1002);
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+
+        }
+    }
+
+    public function actionDeleteDealEvent() {
+        $request = ApiComponent::parseInputData();
+
+        if (isset($request['deal_event_id'])) {
+            $dealEvent = DealEvent::find()->where('id='.$request['deal_event_id'])->one();
+
+            if($dealEvent) {
+                $dealEvent->delete();
+                return ApiComponent::successResponse('Event deleted from deal successfully', [
+                    $dealEvent,
+                ], true);
+            } else {
+                return ApiComponent::errorResponse([], 1002);
+
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+
+        }
     }
 
     /**
@@ -243,18 +374,31 @@ class DealController extends \yii\rest\Controller
      *
      *
      */
-    public function actionAllDeals()
+    public function actionAdminDeals()
     {
         $searchModel = new DealSearch();
-        $query = $searchModel->searchAll(\Yii::$app->request->queryParams, true);
+        $dataProvider = $searchModel->searchAll(\Yii::$app->request->queryParams, false, true);
 
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $query->asArray()->all(),
-        ]);
+        $data = $dataProvider->getModels();
+        $index = 0;
+        foreach ($data as $deal) {
+            $deal['created_at'] = Jdf::jdate('Y/m/d H:i', $deal['created_at']);
+            $data[$index++] = $deal;
+        }
 
-        return ApiComponent::successResponse('', $dataProvider->allModels, true);
+        $page = $dataProvider->pagination->page + 1;
+        $page_size = $dataProvider->pagination->pageSize;
+        $pages = ceil($dataProvider->getTotalCount() / $page_size);
+
+        return ApiComponent::successResponse('Admin deals list', [
+            'data' => $data,
+            'page' => $page,
+            'page_size' => $page_size,
+            'pages' => $pages
+        ], true);
     }
 
+    ////////////////////////  Customers in deals ///////////////////////////
     public function actionCustomersInDeals() {
 
         $deals = \yii\helpers\ArrayHelper::map(Deal::find()->all(), 'id', 'subject');
@@ -344,4 +488,5 @@ class DealController extends \yii\rest\Controller
 
         }
     }
+    ////////////////////////////////////////////////////////////////////////
 }
