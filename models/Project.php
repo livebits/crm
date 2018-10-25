@@ -31,7 +31,6 @@ class Project extends \yii\db\ActiveRecord
     {
         return [
             [['programming_lang', 'created_at', 'updated_at'], 'integer'],
-            [['description'], 'string'],
             [['title'], 'required'],
             [['title'], 'string', 'max' => 255],
         ];
@@ -74,11 +73,10 @@ class Project extends \yii\db\ActiveRecord
 
     public static function languages($selected_lang = null) {
         $langs = [
-            0 => '',
             1 => 'اندروید',
             2 => 'ios',
-            3 => 'php',
             4 => 'reactjs',
+            3 => 'php',
         ];
 
         if(!isset($selected_lang)) {

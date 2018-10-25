@@ -14,7 +14,7 @@ use yii\widgets\ActiveForm;
     $projects = \yii\helpers\ArrayHelper::map(
         (new \yii\db\Query())
             ->from('expert_project')
-            ->select(['expert_project.id', 'project.title as title'])
+            ->select(['project.id as id', 'project.title as title'])
             ->leftJoin('project', 'project.id=expert_project.project_id')
             ->where('expert_project.expert_id=' . Yii::$app->user->id)
             ->all(),

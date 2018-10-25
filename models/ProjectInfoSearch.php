@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\ProjectInfo;
+use yii\db\Query;
 
 /**
  * ProjectInfoSearch represents the model behind the search form of `app\models\ProjectInfo`.
@@ -41,10 +42,16 @@ class ProjectInfoSearch extends ProjectInfo
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $fromApi = false)
     {
-        $query = $this::find()
+        if($fromApi){
+            $queryObj = new Query();
+        } else {
+            $queryObj = $this::find();
+        }
+        $query = $queryObj
             ->select(['project_info.*', 'project.title as project_name'])
+            ->from('project_info')
             ->leftJoin('project', 'project.id=project_info.project_id')
             ->groupBy('project_info.id');
 
