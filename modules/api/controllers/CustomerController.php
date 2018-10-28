@@ -122,13 +122,28 @@ class CustomerController extends \yii\rest\Controller
     public function actionClues()
     {
         $searchModel = new CustomerSearch();
-        $query = $searchModel->searchClues(\Yii::$app->request->queryParams, true);
+        $dataProvider = $searchModel->searchClues(\Yii::$app->request->queryParams, true);
 
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $query->asArray()->all(),
-        ]);
+        $data = $dataProvider->getModels();
+        $index = 0;
+        $newData = [];
+        foreach($data as $clue) {
+            $clue['tasks'] = \app\models\Task::getCustomerTasksStatus($clue['id']);
+            $newData[] = $clue;
+            $index++;
+        }
 
-        return ApiComponent::successResponse('', $dataProvider->allModels, true);
+
+        $page = $dataProvider->pagination->page + 1;
+        $page_size = $dataProvider->pagination->pageSize;
+        $pages = ceil($dataProvider->getTotalCount() / $page_size);
+
+        return ApiComponent::successResponse('clues list', [
+            'data' => $newData,
+            'page' => $page,
+            'page_size' => $page_size,
+            'pages' => $pages
+        ], true);
     }
 
     /**

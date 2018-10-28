@@ -53,12 +53,6 @@ class EventController extends \yii\rest\Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         $data = $dataProvider->getModels();
-        $index = 0;
-        foreach ($data as $event) {
-            $event['created_at'] = Jdf::jdate('Y/m/d H:i', $event['created_at']);
-            $data[$index++] = $event;
-        }
-
         $page = $dataProvider->pagination->page + 1;
         $page_size = $dataProvider->pagination->pageSize;
         $pages = ceil($dataProvider->getTotalCount() / $page_size);
@@ -79,8 +73,20 @@ class EventController extends \yii\rest\Controller
 
             $model = new Event();
             $model->name = $request['name'];
-//            $model->priority = $request['priority'];
+            $model->priority = $request['priority'];
             if ($model->save()) {
+                $checkPriority = Event::find()
+                    ->where('priority=' . $request['priority'])
+                    ->andWhere('id<>' . $model->id)
+                    ->one();
+                if($checkPriority) {
+                    
+                    $sqlCommand = "UPDATE `event` SET `priority`=`priority` + 1 WHERE (`priority` >= {$request['priority']}) AND (`id` <> {$model->id})";
+
+                    $connection = Yii::$app->getDb();
+                    $command = $connection->createCommand($sqlCommand);
+                    $result = $command->execute();
+                }
                 return ApiComponent::successResponse('Event saved successfully', $model, true);
             } else {
                 return ApiComponent::errorResponse([], 500);
@@ -101,6 +107,20 @@ class EventController extends \yii\rest\Controller
             $model = Event::find()->where('id='.$request['id'])->one();
             if($model) {
                 Event::updateAll(['name' => $request['name'], 'priority' => $request['priority']], ['id' => $request['id']]);
+
+                $checkPriority = Event::find()
+                    ->where('priority=' . $request['priority'])
+                    ->andWhere('id<>' . $model->id)
+                    ->one();
+                if($checkPriority) {
+                    
+                    $sqlCommand = "UPDATE `event` SET `priority`=`priority` + 1 WHERE (`priority` >= {$request['priority']}) AND (`id` <> {$model->id})";
+
+                    $connection = Yii::$app->getDb();
+                    $command = $connection->createCommand($sqlCommand);
+                    $result = $command->execute();
+                }
+
                 return ApiComponent::successResponse('Event updated successfully', $model, true);
             } else {
                 return ApiComponent::errorResponse([], 1002);

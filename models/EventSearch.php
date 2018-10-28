@@ -67,6 +67,8 @@ class EventSearch extends Event
 
         $query->andFilterWhere(['like', 'name', $this->name]);
 
+        $query->orderBy(['priority' => SORT_ASC]);
+
         return $dataProvider;
     }
 }

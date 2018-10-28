@@ -16,7 +16,7 @@ class CustomerSearch extends Customer
     public $FirstName;
     public $LastName;
     public $Mobile;
-    public $Source;
+    public $SourceName;
 
     public $meetingCount;
     public $sum_rating;
@@ -32,8 +32,8 @@ class CustomerSearch extends Customer
     public function rules()
     {
         return [
-            [['id', 'user_id', 'status', 'Mobile', 'Source', 'created_at', 'updated_at'], 'integer'],
-            [['FirstName', 'LastName'], 'string'],
+            [['id', 'user_id', 'status', 'Mobile', 'created_at', 'updated_at'], 'integer'],
+            [['FirstName', 'LastName', 'SourceName'], 'string'],
         ];
     }
 
@@ -53,15 +53,21 @@ class CustomerSearch extends Customer
      *
      * @return ActiveDataProvider
      */
-    public function searchClues($params, $getQuery = false)
+    public function searchClues($params, $fromApi = false)
     {
-        $query = $this::find()
-            ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
+        if($fromApi){
+            $thisQuery = new yii\db\Query; 
+        } else {
+            $thisQuery = $this::find();
+        }
+        $query = $thisQuery
+            ->select(['customer.*', 'SUM(cm.rating) as sum_rating', 'src.name as SourceName',
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
                 'COUNT(cm.id) as meetingCount'])
             ->from('customer')
             ->where('status="' . Customer::$CLUE . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
+            ->leftJoin('source as src', 'customer.source = src.id')
             ->groupBy('customer.id');
 
         // add conditions that should always apply here
@@ -100,18 +106,14 @@ class CustomerSearch extends Customer
             ->andFilterWhere(['like', 'position', $this->position])
             ->andFilterWhere(['=', 'mobile', $this->Mobile])
             ->andFilterWhere(['=', 'phone', $this->phone])
-            ->andFilterWhere(['=', 'source', $this->Source])
+            ->andFilterWhere(['=', 'source', $this->source])
             ->andFilterWhere(['like', 'description', $this->description]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
-
-        if($getQuery) {
-            return $query;
-        } else {
-            return $dataProvider;
-        }
+       
+        return $dataProvider;
     }
 
     public function searchOffCustomers($params, $getQuery = false)
