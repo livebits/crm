@@ -2,6 +2,7 @@
 
 namespace app\modules\api\controllers;
 
+use Yii;
 use app\components\ApiComponent;
 use app\models\Customer;
 use app\models\CustomerSearch;
@@ -146,6 +147,128 @@ class CustomerController extends \yii\rest\Controller
         ], true);
     }
 
+    public function actionNewClue() {
+        $request = Yii::$app->request->post();
+//        $request = ApiComponent::parseInputData();
+
+        if (isset($request['lastName']) && isset($request['mobile'])) {
+
+            $model = new Customer();
+            $model->user_id = \Yii::$app->user->id;
+            $model->firstName = isset($request['firstName']) ? $request['firstName'] : '';
+            $model->lastName = isset($request['lastName']) ? $request['lastName'] : '';
+            $model->mobile = isset($request['mobile']) ? $request['mobile'] : '';
+            $model->phone = isset($request['phone']) ? $request['phone'] : '';
+            $model->companyName = isset($request['companyName']) ? $request['companyName'] : '';
+            $model->position = isset($request['position']) ? $request['position'] : '';
+            $model->source = isset($request['source']) ? $request['source'] : '';
+            $model->description = isset($request['description']) ? $request['description'] : '';
+
+            $transaction = Yii::$app->getDb()->beginTransaction();
+            $dbSuccess = true;
+
+            if (!$model->save()) {
+                $dbSuccess = false;
+            }
+
+            if ($dbSuccess) {
+                $imageName = '';
+
+                if(@$_FILES){
+                    $uploaded_files = $_FILES['Customer'];
+                    $file_name = $uploaded_files['name']['image'];
+                    if($file_name)
+                    {
+                        $file_name = 'image'. time(). $file_name;
+                        $file_tmp = $uploaded_files['tmp_name']['image'];
+                        move_uploaded_file($file_tmp, 'Uploads/' . $file_name);
+    
+                        $imageName = $file_name;
+                    }
+                }
+
+                $transaction->commit();
+
+                if($imageName != ''){
+                    Customer::updateAll(['image' => $imageName], ['id' => $model->id]);
+                }
+
+                return ApiComponent::successResponse('Clue saved successfully', $model, true);
+
+            } else {
+                $transaction->rollBack();
+                return ApiComponent::errorResponse([], 500);
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+        }
+    }
+
+    public function actionEdit() {
+        $request = Yii::$app->request->post();
+//        $request = ApiComponent::parseInputData();
+
+        if (isset($request['id']) && isset($request['lastName']) && isset($request['mobile'])) {
+
+            $model = Customer::find()->where('id='. $request['id'])->one();
+            if(!$model) {
+                return ApiComponent::errorResponse([], 1002);
+            }
+
+            $model->firstName = isset($request['firstName']) ? $request['firstName'] : '';
+            $model->lastName = isset($request['lastName']) ? $request['lastName'] : '';
+            $model->mobile = isset($request['mobile']) ? $request['mobile'] : '';
+            $model->phone = isset($request['phone']) ? $request['phone'] : '';
+            $model->companyName = isset($request['companyName']) ? $request['companyName'] : '';
+            $model->position = isset($request['position']) ? $request['position'] : '';
+            $model->source = isset($request['source']) ? $request['source'] : '';
+            $model->description = isset($request['description']) ? $request['description'] : '';
+            
+            $model->image = isset($request['image']) ? $request['image'] : 0;
+            $model->status = isset($request['status']) ? $request['status'] : 0;
+
+            $transaction = Yii::$app->getDb()->beginTransaction();
+            $dbSuccess = true;
+
+            if (!$model->save()) {
+                $dbSuccess = false;
+            }
+
+            if ($dbSuccess) {
+                $imageName = '';
+
+                if(@$_FILES){
+                    $uploaded_files = $_FILES['Customer'];
+                    $file_name = $uploaded_files['name']['image'];
+                    if($file_name)
+                    {
+                        $file_name = 'image'. time(). $file_name;
+                        $file_tmp = $uploaded_files['tmp_name']['image'];
+                        move_uploaded_file($file_tmp, 'Uploads/' . $file_name);
+    
+                        $imageName = $file_name;
+                    }
+                }
+
+                $transaction->commit();
+
+                if($imageName != ''){
+                    Customer::updateAll(['image' => $imageName], ['id' => $model->id]);
+                }
+
+                return ApiComponent::successResponse('Customer updated successfully', $model, true);
+
+            } else {
+                $transaction->rollBack();
+                return ApiComponent::errorResponse([], 500);
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+        }
+    }
+
     /**
      * @api {post} /customer/customers 3- List of customers
      * @apiName 3.List of customers
@@ -229,13 +352,27 @@ class CustomerController extends \yii\rest\Controller
     public function actionCustomers()
     {
         $searchModel = new CustomerSearch();
-        $query = $searchModel->searchCustomers(\Yii::$app->request->queryParams, true);
+        $dataProvider = $searchModel->searchCustomers(\Yii::$app->request->queryParams, true);
 
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $query->asArray()->all(),
-        ]);
+        $data = $dataProvider->getModels();
+        $index = 0;
+        $newData = [];
+        foreach($data as $customer) {
+            $customer['tasks'] = \app\models\Task::getCustomerTasksStatus($customer['id']);
+            $newData[] = $customer;
+            $index++;
+        }
 
-        return ApiComponent::successResponse('', $dataProvider->allModels, true);
+        $page = $dataProvider->pagination->page + 1;
+        $page_size = $dataProvider->pagination->pageSize;
+        $pages = ceil($dataProvider->getTotalCount() / $page_size);
+
+        return ApiComponent::successResponse('customers list', [
+            'data' => $newData,
+            'page' => $page,
+            'page_size' => $page_size,
+            'pages' => $pages
+        ], true);
     }
 
     /**
@@ -321,13 +458,27 @@ class CustomerController extends \yii\rest\Controller
     public function actionOffCustomers()
     {
         $searchModel = new CustomerSearch();
-        $query = $searchModel->searchOffCustomers(\Yii::$app->request->queryParams, true);
+        $dataProvider = $searchModel->searchOffCustomers(\Yii::$app->request->queryParams, true);
 
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $query->asArray()->all(),
-        ]);
+        $data = $dataProvider->getModels();
+        $index = 0;
+        $newData = [];
+        foreach($data as $customer) {
+            $customer['tasks'] = \app\models\Task::getCustomerTasksStatus($customer['id']);
+            $newData[] = $customer;
+            $index++;
+        }
 
-        return ApiComponent::successResponse('', $dataProvider->allModels, true);
+        $page = $dataProvider->pagination->page + 1;
+        $page_size = $dataProvider->pagination->pageSize;
+        $pages = ceil($dataProvider->getTotalCount() / $page_size);
+
+        return ApiComponent::successResponse('off customers list', [
+            'data' => $newData,
+            'page' => $page,
+            'page_size' => $page_size,
+            'pages' => $pages
+        ], true);
     }
 
     /**
@@ -413,13 +564,68 @@ class CustomerController extends \yii\rest\Controller
     public function actionContacts()
     {
         $searchModel = new CustomerSearch();
-        $query = $searchModel->searchContacts(\Yii::$app->request->queryParams, true);
+        $dataProvider = $searchModel->searchContacts(\Yii::$app->request->queryParams, true);
 
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $query->asArray()->all(),
-        ]);
+        $data = $dataProvider->getModels();
+        $index = 0;
+        $newData = [];
+        foreach($data as $customer) {
+            $customer['tasks'] = \app\models\Task::getCustomerTasksStatus($customer['id']);
+            $newData[] = $customer;
+            $index++;
+        }
 
-        return ApiComponent::successResponse('', $dataProvider->allModels, true);
+        $page = $dataProvider->pagination->page + 1;
+        $page_size = $dataProvider->pagination->pageSize;
+        $pages = ceil($dataProvider->getTotalCount() / $page_size);
+
+        return ApiComponent::successResponse('Contacts list', [
+            'data' => $newData,
+            'page' => $page,
+            'page_size' => $page_size,
+            'pages' => $pages
+        ], true);
     }
 
+    public function actionMoveToOffCustomers()
+    {
+        $request = ApiComponent::parseInputData();
+
+        if (isset($request['id'])) {
+
+            $model = Customer::find()->where('id='.$request['id'])->one();
+            if($model) {
+                $model->status = Customer::$OFF_CUSTOMER;
+                $model->save();
+                return ApiComponent::successResponse('customer status changed successfully', $model, true);
+            } else {
+                return ApiComponent::errorResponse([], 1002);
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+
+        }
+    }
+
+    public function actionMoveToClues()
+    {
+        $request = ApiComponent::parseInputData();
+
+        if (isset($request['id'])) {
+
+            $model = Customer::find()->where('id='.$request['id'])->one();
+            if($model) {
+                $model->status = Customer::$CLUE;
+                $model->save();
+                return ApiComponent::successResponse('customer status changed successfully', $model, true);
+            } else {
+                return ApiComponent::errorResponse([], 1002);
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+
+        }
+    }
 }

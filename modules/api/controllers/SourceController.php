@@ -2,8 +2,10 @@
 
 namespace app\modules\api\controllers;
 
+use Yii;
 use app\components\ApiComponent;
 use app\models\SourceSearch;
+use app\models\Source;
 use yii\data\ArrayDataProvider;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBearerAuth;
@@ -34,49 +36,84 @@ class SourceController extends \yii\rest\Controller
         return $behaviors;
     }
 
-    /**
-     * @api {post} /deal-level/get-levels 11- list of all deal levels
-     * @apiName 11.List of all deal levels
-     * @apiGroup Deal
-     *
-     *
-     * @apiSuccess {Array} data response data.
-     * @apiSuccess {String} data.id source id.
-     * @apiSuccess {String} data.name source name.
-     * @apiSuccess {String} message response message.
-     * @apiSuccess {Integer} code response code [0: failure, 1: success].
-     * @apiSuccess {Integer} status response status code [see -status table-].
-     *
-     *
-     * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     *       {
-     *           "data": [
-     *               {
-     *                   "id": 1,
-     *                   "name": "آقای سعیدی"
-     *               },
-     *               {
-     *                   "id": 2,
-     *                   "name": "روزنامه های کثیر الانتشار"
-     *               }
-     *           ],
-     *           "message": "",
-     *           "code": 1,
-     *           "status": 200
-     *      }
-     *
-     */
-    public function actionGetSources()
-    {
+    /////////////////////////////     Sources     ///////////////////////////
+    public function actionGetSources() {
         $searchModel = new SourceSearch();
-        $query = $searchModel->search(\Yii::$app->request->queryParams, true);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $query->all(),
-        ]);
+        $data = $dataProvider->getModels();
+        $page = $dataProvider->pagination->page + 1;
+        $page_size = $dataProvider->pagination->pageSize;
+        $pages = ceil($dataProvider->getTotalCount() / $page_size);
 
-        return ApiComponent::successResponse('', $dataProvider->allModels, true);
+        return ApiComponent::successResponse('Source list', [
+            'data' => $data,
+            'page' => $page,
+            'page_size' => $page_size,
+            'pages' => $pages
+        ], true);
     }
+
+    public function actionNew()
+    {
+        $request = ApiComponent::parseInputData();
+
+        if (isset($request['name'])) {
+
+            $model = new Source();
+            $model->name = $request['name'];
+            if ($model->save()) {
+                return ApiComponent::successResponse('Source saved successfully', $model, true);
+            } else {
+                return ApiComponent::errorResponse([], 500);
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+
+        }
+    }
+
+    public function actionEdit()
+    {
+        $request = ApiComponent::parseInputData();
+
+        if (isset($request['id']) && isset($request['name'])) {
+
+            $model = Source::find()->where('id='.$request['id'])->one();
+            if($model) {
+                Source::updateAll(['name' => $request['name']], ['id' => $request['id']]);
+
+                return ApiComponent::successResponse('Source updated successfully', $model, true);
+            } else {
+                return ApiComponent::errorResponse([], 1002);
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+
+        }
+    }
+
+    public function actionDelete()
+    {
+        $request = ApiComponent::parseInputData();
+
+        if (isset($request['id'])) {
+
+            $model = Source::find()->where('id='.$request['id'])->one();
+            if($model) {
+                Source::deleteAll('id='. $request['id']);
+                return ApiComponent::successResponse('Source deleted successfully', $model, true);
+            } else {
+                return ApiComponent::errorResponse([], 1002);
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+
+        }
+    }
+    ////////////////////////////////////////////////////////////////////////
 
 }

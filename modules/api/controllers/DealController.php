@@ -98,6 +98,60 @@ class DealController extends \yii\rest\Controller
         }
     }
 
+    public function actionNew()
+    {
+        $request = ApiComponent::parseInputData();
+
+        if (isset($request['subject']) && isset($request['price']) && isset($request['customer_id'])) {
+
+            $model = new Deal();
+            $model->subject = $request['subject'];
+            $model->price = $request['price'];
+            $model->customer_id = $request['customer_id'];
+            $model->created_at = time();
+            $model->level = 0;
+            if ($model->save()) {
+                
+                return ApiComponent::successResponse('Deal saved successfully', $model, true);
+            } else {
+                return ApiComponent::errorResponse([], 500);
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+
+        }
+    }
+
+    public function actionEdit()
+    {
+        $request = ApiComponent::parseInputData();
+
+        if (isset($request['id'])) {
+
+            $model = Deal::find()->where('id='.$request['id'])->one();
+            if($model) {
+                
+                if(isset($request['subject'])){
+                    $model->subject = $request['subject'];
+                }
+
+                if(isset($request['price'])){
+                    $model->price = $request['price'];
+                }
+                $model->save();
+
+                return ApiComponent::successResponse('Deal updated successfully', $model, true);
+            } else {
+                return ApiComponent::errorResponse([], 1002);
+            }
+
+        } else {
+            return ApiComponent::errorResponse([], 1000);
+
+        }
+    }
+
     public function actionAddDealEvent() {
         $request = ApiComponent::parseInputData();
 
@@ -269,28 +323,41 @@ class DealController extends \yii\rest\Controller
      */
     public function actionCustomerDeals()
     {
-        $user_deals = UserDeal::find()->select('deal_id')->where('user_id=' . Yii::$app->user->id)->all();
+        $request = ApiComponent::parseInputData();
+        $customerId = 0;
         $user_deals_id = [];
         $user_deals_id[] = -1;
-        foreach ($user_deals as $user_deal) {
-            $user_deals_id[] = $user_deal->deal_id;
+
+        if (isset($request['id'])) {
+            $user_deals = Deal::find()->select('id')->where('customer_id=' . $request['id'])->all();
+
+            foreach ($user_deals as $user_deal) {
+                $user_deals_id[] = $user_deal->id;
+            }
+        } else {
+            $user_deals = UserDeal::find()->select('deal_id')->where('user_id=' . Yii::$app->user->id)->all();
+
+            foreach ($user_deals as $user_deal) {
+                $user_deals_id[] = $user_deal->deal_id;
+            }
         }
 
         $searchModel = new DealSearch();
         $dataProvider = $searchModel->searchUserDeals(Yii::$app->request->queryParams, $user_deals_id, true);
 
-        $data = $dataProvider->getModels();
+        $deals_data = $dataProvider->getModels();
         $index = 0;
-        foreach ($data as $deal) {
-            $deal['created_at'] = Jdf::jdate('Y/m/d H:i', $deal['created_at']);
-            $data[$index++] = $deal;
+        $data = [];
+        foreach ($deals_data as $deal) {
+            $deal['tasks'] = \app\models\Task::getDealTasksStatus($deal['id']);
+            $data[] = $deal;
         }
 
         $page = $dataProvider->pagination->page + 1;
         $page_size = $dataProvider->pagination->pageSize;
         $pages = ceil($dataProvider->getTotalCount() / $page_size);
 
-        return ApiComponent::successResponse('Customer deals list', [
+        return ApiComponent::successResponse('deals list', [
             'data' => $data,
             'page' => $page,
             'page_size' => $page_size,
@@ -382,7 +449,7 @@ class DealController extends \yii\rest\Controller
         $data = $dataProvider->getModels();
         $index = 0;
         foreach ($data as $deal) {
-            $deal['created_at'] = Jdf::jdate('Y/m/d H:i', $deal['created_at']);
+            $deal['tasks'] = \app\models\Task::getDealTasksStatus($deal['id']);
             $data[$index++] = $deal;
         }
 
@@ -390,7 +457,7 @@ class DealController extends \yii\rest\Controller
         $page_size = $dataProvider->pagination->pageSize;
         $pages = ceil($dataProvider->getTotalCount() / $page_size);
 
-        return ApiComponent::successResponse('Admin deals list', [
+        return ApiComponent::successResponse('deals list', [
             'data' => $data,
             'page' => $page,
             'page_size' => $page_size,

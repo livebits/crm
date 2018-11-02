@@ -17,6 +17,7 @@ class CustomerSearch extends Customer
     public $LastName;
     public $Mobile;
     public $SourceName;
+    public $Source;
 
     public $meetingCount;
     public $sum_rating;
@@ -95,7 +96,7 @@ class CustomerSearch extends Customer
             'customer.id' => $this->id,
             'user_id' => $this->user_id,
             'status' => $this->status,
-            'source' => $this->source,
+            'customer.source' => $this->source,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
@@ -106,7 +107,7 @@ class CustomerSearch extends Customer
             ->andFilterWhere(['like', 'position', $this->position])
             ->andFilterWhere(['=', 'mobile', $this->Mobile])
             ->andFilterWhere(['=', 'phone', $this->phone])
-            ->andFilterWhere(['=', 'source', $this->source])
+            ->andFilterWhere(['=', 'customer.source', $this->source])
             ->andFilterWhere(['like', 'description', $this->description]);
 
         $dataProvider = new ActiveDataProvider([
@@ -116,13 +117,18 @@ class CustomerSearch extends Customer
         return $dataProvider;
     }
 
-    public function searchOffCustomers($params, $getQuery = false)
+    public function searchOffCustomers($params, $fromApi = false)
     {
-        $query = $this::find()
+        if($fromApi){
+            $thisQuery = new yii\db\Query; 
+        } else {
+            $thisQuery = $this::find();
+        }
+        $query = $thisQuery
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
                 'COUNT(cm.id) as meetingCount'])
-//            ->from('customer')
+            ->from('customer')
             ->where('status="' . Customer::$OFF_CUSTOMER . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
             ->groupBy('customer.id');
@@ -169,20 +175,21 @@ class CustomerSearch extends Customer
             'query' => $query,
         ]);
 
-        if($getQuery) {
-            return $query;
-        } else {
-            return $dataProvider;
-        }
+        return $dataProvider;
     }
 
-    public function searchContacts($params, $getQuery = false)
+    public function searchContacts($params, $fromApi = false)
     {
-        $query = $this::find()
+        if($fromApi){
+            $thisQuery = new yii\db\Query; 
+        } else {
+            $thisQuery = $this::find();
+        }
+        $query = $thisQuery
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
                 'COUNT(cm.id) as meetingCount'])
-//            ->from('customer')
+            ->from('customer')
             ->where('status="' . Customer::$CLUE . '"')
             ->orWhere('status="' . Customer::$CUSTOMER . '"')
             ->orWhere('status="' . Customer::$OFF_CUSTOMER . '"')
@@ -231,20 +238,21 @@ class CustomerSearch extends Customer
             'query' => $query,
         ]);
 
-        if($getQuery) {
-            return $query;
-        } else {
-            return $dataProvider;
-        }
+        return $dataProvider;
     }
 
-    public function searchCustomers($params, $getQuery = false)
+    public function searchCustomers($params, $fromApi = false)
     {
-        $query = $this::find()
+        if($fromApi){
+            $thisQuery = new yii\db\Query; 
+        } else {
+            $thisQuery = $this::find();
+        }
+        $query = $thisQuery
             ->select(['customer.*', 'SUM(cm.rating) as sum_rating',
                 'MAX(cm.created_at) as latestMeeting', 'MAX(cm.next_date) as nextMeeting',
                 'COUNT(cm.id) as meetingCount'])
-//            ->from('customer')
+            ->from('customer')
             ->where('status="' . Customer::$CUSTOMER . '"')
             ->leftJoin('meeting as cm', 'cm.customer_id = customer.id')
             ->groupBy('customer.id');
@@ -291,11 +299,7 @@ class CustomerSearch extends Customer
             'query' => $query,
         ]);
 
-        if($getQuery) {
-            return $query;
-        } else {
-            return $dataProvider;
-        }
+        return $dataProvider;
     }
 
     public function searchDeals($params, $getQuery = false)
