@@ -59,7 +59,7 @@ class DealController extends \yii\rest\Controller
                 ->leftJoin('deal_event', 'deal_event.deal_id = deal.id')
                 ->leftJoin('event', 'event.id = deal_event.event_id')
                 ->where('deal.id=' . $request['id'])
-                ->orderBy('event.id')
+                ->orderBy('deal_event.value')
                 ->all();
 
             if($deals) {
@@ -350,6 +350,7 @@ class DealController extends \yii\rest\Controller
         $data = [];
         foreach ($deals_data as $deal) {
             $deal['tasks'] = \app\models\Task::getDealTasksStatus($deal['id']);
+            $deal['lastEvent'] = \app\models\Event::getDealLastEvent($deal['id']);
             $data[] = $deal;
         }
 
@@ -450,6 +451,7 @@ class DealController extends \yii\rest\Controller
         $index = 0;
         foreach ($data as $deal) {
             $deal['tasks'] = \app\models\Task::getDealTasksStatus($deal['id']);
+            $deal['lastEvent'] = \app\models\Event::getDealLastEvent($deal['id']);
             $data[$index++] = $deal;
         }
 

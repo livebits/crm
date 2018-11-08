@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\Query;
 
 /**
  * This is the model class for table "event".
@@ -66,5 +67,18 @@ class Event extends \yii\db\ActiveRecord
             'created_at' => 'تاریخ  ثبت',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public static function getDealLastEvent($deal_id) {
+        
+        $query = (new Query())
+            ->select(['event.id' ,'event.name as lastEvent'])
+            ->from('deal_event')
+            ->leftJoin('event', 'deal_event.event_id=event.id')
+            ->where('deal_event.deal_id=' . $deal_id)
+            ->orderBy('deal_event.value DESC')
+            ->one();
+
+        return $query['lastEvent'];
     }
 }

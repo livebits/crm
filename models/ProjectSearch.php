@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Project;
+use yii\db\Query;
 
 /**
  * ProjectSearch represents the model behind the search form of `app\models\Project`.
@@ -39,9 +40,13 @@ class ProjectSearch extends Project
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $fromApi = false)
     {
-        $query = Project::find();
+        if($fromApi){
+            $query = (new Query())->select('*')->from('project');
+        } else {
+            $query = $this::find();
+        }
 
         // add conditions that should always apply here
 

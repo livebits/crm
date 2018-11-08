@@ -51,7 +51,7 @@ class ProjectController extends \yii\rest\Controller
     /////////////////////////////     Projects     ///////////////////////////
     public function actionGetProjects() {
         $searchModel = new ProjectSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, true);
 
         $data = $dataProvider->getModels();
         $index = 0;
