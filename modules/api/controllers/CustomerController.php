@@ -144,7 +144,8 @@ class CustomerController extends \yii\rest\Controller
             'data' => $newData,
             'page' => $page,
             'page_size' => $page_size,
-            'pages' => $pages
+            'pages' => $pages,
+            'count' => $dataProvider->getTotalCount()
         ], true);
     }
 
@@ -372,7 +373,8 @@ class CustomerController extends \yii\rest\Controller
             'data' => $newData,
             'page' => $page,
             'page_size' => $page_size,
-            'pages' => $pages
+            'pages' => $pages,
+            'count' => $dataProvider->getTotalCount()
         ], true);
     }
 
@@ -478,7 +480,8 @@ class CustomerController extends \yii\rest\Controller
             'data' => $newData,
             'page' => $page,
             'page_size' => $page_size,
-            'pages' => $pages
+            'pages' => $pages,
+            'count' => $dataProvider->getTotalCount()
         ], true);
     }
 
@@ -584,7 +587,8 @@ class CustomerController extends \yii\rest\Controller
             'data' => $newData,
             'page' => $page,
             'page_size' => $page_size,
-            'pages' => $pages
+            'pages' => $pages,
+            'count' => $dataProvider->getTotalCount()
         ], true);
     }
 
@@ -670,7 +674,8 @@ class CustomerController extends \yii\rest\Controller
             'data' => $data,
             'page' => $page,
             'page_size' => $page_size,
-            'pages' => $pages
+            'pages' => $pages,
+            'count' => $dataProvider->getTotalCount()
         ], true);
     }
 }
