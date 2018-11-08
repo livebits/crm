@@ -7,6 +7,7 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Meeting;
 use webvimark\modules\UserManagement\models\User;
+use yii\db\Query;
 
 /**
  * MeetingSearch represents the model behind the search form of `app\models\Meeting`.
@@ -95,9 +96,15 @@ class MeetingSearch extends Meeting
         }
     }
 
-    public function searchCustomersLates($params, $lateMeetingsIds)
+    public function searchCustomersLates($params, $lateMeetingsIds, $fromApi = false)
     {
-        $query = $this::find()
+        if($fromApi){
+            $fquery = new Query();
+        } else {
+            $fquery = $this::find();
+        }
+
+        $query = $fquery
             ->select(['user.username', 'meeting.*', 'customer.id as customer_code',
                 'CONCAT(customer.firstName, " ", customer.lastName) as customer_name'
             ])
@@ -146,9 +153,15 @@ class MeetingSearch extends Meeting
         return $dataProvider;
     }
 
-    public function searchDealsLates($params, $lateMeetingsIds)
+    public function searchDealsLates($params, $lateMeetingsIds, $fromApi = false)
     {
-        $query = $this::find()
+        if($fromApi){
+            $fquery = new Query();
+        } else {
+            $fquery = $this::find();
+        }
+
+        $query = $fquery
             ->select(['user.username', 'meeting.*', 'customer.id as customer_code',
                 'CONCAT(customer.firstName, " ", customer.lastName) as customer_name',
                 'deal.subject as deal_subject'

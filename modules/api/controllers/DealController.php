@@ -13,6 +13,7 @@ use app\models\CustomerSearch;
 use app\models\Deal;
 use app\models\DealSearch;
 use app\models\Meeting;
+use app\models\MeetingSearch;
 use app\models\UserDeal;
 use webvimark\modules\UserManagement\models\User;
 use yii\data\ActiveDataProvider;
@@ -558,4 +559,46 @@ class DealController extends \yii\rest\Controller
         }
     }
     ////////////////////////////////////////////////////////////////////////
+
+    public function actionLateDealsMeetings()
+    {
+        $deals_meetings = Meeting::find()
+            ->where('customer_id IS NULL')
+            ->andWhere('next_date IS NOT NULL')
+            ->orderBy('created_at DESC')
+            ->all();
+
+        $lateMeetingsIds = [];
+        $lateMeetingsIds[] = -1;
+        $deal_ids = [];
+        foreach ($deals_meetings as $deals_meeting) {
+
+            if (in_array($deals_meeting->deal_id, $deal_ids)) {
+                continue;
+            }
+
+            $deal_ids[] = $deals_meeting->deal_id;
+            if(date('Y-m-d', $deals_meeting->next_date) < date('Y-m-d', time())){
+
+                $lateMeetingsIds[] = $deals_meeting->id;
+            }
+        }
+
+        $lateMeetingsIds = implode(",",$lateMeetingsIds);
+
+        $searchModel = new MeetingSearch();
+        $dataProvider = $searchModel->searchDealsLates(Yii::$app->request->queryParams, $lateMeetingsIds, true);
+
+        $data = $dataProvider->getModels();
+        $page = $dataProvider->pagination->page + 1;
+        $page_size = $dataProvider->pagination->pageSize;
+        $pages = ceil($dataProvider->getTotalCount() / $page_size);
+
+        return ApiComponent::successResponse('customers late meetings', [
+            'data' => $data,
+            'page' => $page,
+            'page_size' => $page_size,
+            'pages' => $pages
+        ], true);
+    }
 }

@@ -8,6 +8,7 @@ use app\models\Customer;
 use app\models\CustomerSearch;
 use app\models\Deal;
 use app\models\Meeting;
+use app\models\MeetingSearch;
 use webvimark\modules\UserManagement\models\User;
 use yii\data\ArrayDataProvider;
 use yii\db\Query;
@@ -627,5 +628,49 @@ class CustomerController extends \yii\rest\Controller
             return ApiComponent::errorResponse([], 1000);
 
         }
+    }
+
+    public function actionLateCustomersMeetings()
+    {
+        $customers_meetings = Meeting::find()
+            ->leftJoin('customer', 'customer.id=meeting.customer_id')
+            ->where('deal_id IS NULL')
+            ->andWhere('next_date IS NOT NULL')
+            ->andWhere('customer.status != ' . Customer::$OFF_CUSTOMER)
+            ->orderBy('created_at DESC')
+            ->all();
+
+        $lateMeetingsIds = [];
+        $lateMeetingsIds[] = -1;
+        $customer_ids = [];
+        foreach ($customers_meetings as $customers_meeting) {
+
+            if (in_array($customers_meeting->customer_id, $customer_ids)) {
+                continue;
+            }
+
+            $customer_ids[] = $customers_meeting->customer_id;
+            if(date('Y-m-d', $customers_meeting->next_date) < date('Y-m-d', time())){
+
+                $lateMeetingsIds[] = $customers_meeting->id;
+            }
+        }
+
+        $lateMeetingsIds = implode(",",$lateMeetingsIds);
+
+        $searchModel = new MeetingSearch();
+        $dataProvider = $searchModel->searchCustomersLates(Yii::$app->request->queryParams, $lateMeetingsIds, true);
+
+        $data = $dataProvider->getModels();
+        $page = $dataProvider->pagination->page + 1;
+        $page_size = $dataProvider->pagination->pageSize;
+        $pages = ceil($dataProvider->getTotalCount() / $page_size);
+
+        return ApiComponent::successResponse('customers late meetings', [
+            'data' => $data,
+            'page' => $page,
+            'page_size' => $page_size,
+            'pages' => $pages
+        ], true);
     }
 }

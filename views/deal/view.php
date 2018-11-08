@@ -70,7 +70,11 @@ $this->params['breadcrumbs'][] = $this->title;
                                         ->select('level_name')
                                         ->where('id='.$model->level)
                                         ->one();
-                                    return $level->level_name;
+                                    if(isset($level)){    
+                                        return $level->level_name;
+                                    } else {
+                                        return '';
+                                    }
                                 }
                             ],
                             [
