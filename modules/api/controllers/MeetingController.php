@@ -6,6 +6,8 @@ use app\components\ApiComponent;
 use app\models\DealLevelSearch;
 use app\models\DealSearch;
 use app\models\Media;
+use app\models\Task;
+use app\models\Customer;
 use app\models\Meeting;
 use app\models\MeetingSearch;
 use yii\data\ArrayDataProvider;
@@ -120,13 +122,31 @@ class MeetingController extends \yii\rest\Controller
         if (isset($request['customer_id'])) {
 
             $searchModel = new MeetingSearch();
-            $query = $searchModel->search(\Yii::$app->request->queryParams, $request['customer_id'], true);
+            $dataProvider = $searchModel->search(\Yii::$app->request->queryParams, $request['customer_id'], true);
 
-            $dataProvider = new ArrayDataProvider([
-                'allModels' => $query->asArray()->all(),
-            ]);
+            $data = $dataProvider->getModels();
+            $page = $dataProvider->pagination->page + 1;
+            $page_size = $dataProvider->pagination->pageSize;
+            $pages = ceil($dataProvider->getTotalCount() / $page_size);
 
-            return ApiComponent::successResponse('', $dataProvider->allModels, true);
+            $tasks = Task::find()
+                ->where('customer_id=' . $request['customer_id'])
+                ->orderBy('created_at DESC')
+                ->all();
+
+            $customer = Customer::find()
+                ->where('id=' . $request['customer_id'])
+                ->one();    
+
+            return ApiComponent::successResponse('Customer meetings list', [
+                'data' => $data,
+                'tasks' => $tasks,
+                'customer' => $customer,
+                'page' => $page,
+                'page_size' => $page_size,
+                'pages' => $pages,
+                'count' => $dataProvider->getTotalCount()
+            ], true);
 
         } else {
             return ApiComponent::errorResponse([], 1000);
@@ -217,13 +237,26 @@ class MeetingController extends \yii\rest\Controller
         if (isset($request['deal_id'])) {
 
             $searchModel = new MeetingSearch();
-            $query = $searchModel->searchForDeals(\Yii::$app->request->queryParams, $request['deal_id'], true);
+            $dataProvider = $searchModel->searchForDeals(\Yii::$app->request->queryParams, $request['deal_id'], true);
 
-            $dataProvider = new ArrayDataProvider([
-                'allModels' => $query->asArray()->all(),
-            ]);
+            $data = $dataProvider->getModels();
+            $page = $dataProvider->pagination->page + 1;
+            $page_size = $dataProvider->pagination->pageSize;
+            $pages = ceil($dataProvider->getTotalCount() / $page_size);
 
-            return ApiComponent::successResponse('', $dataProvider->allModels, true);
+            $tasks = Task::find()
+                ->where('deal_id=' . $request['deal_id'])
+                ->orderBy('created_at DESC')
+                ->all();
+
+            return ApiComponent::successResponse('Deal meetings list', [
+                'data' => $data,
+                'tasks' => $tasks,
+                'page' => $page,
+                'page_size' => $page_size,
+                'pages' => $pages,
+                'count' => $dataProvider->getTotalCount()
+            ], true);
 
         } else {
             return ApiComponent::errorResponse([], 1000);

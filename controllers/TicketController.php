@@ -370,7 +370,7 @@ class TicketController extends Controller
 
                 if (!Yii::$app->user->isSuperadmin && User::is_in_role(Yii::$app->user->id, 'customer')) {
                     $model->status = Ticket::NEED_EXPERT_REPLY;
-                } else if (User::is_in_role(Yii::$app->user->id, 'expert')) {
+                } else {
                     $model->status = Ticket::NEED_CUSTOMER_REPLY;
                 }
 

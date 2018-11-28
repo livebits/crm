@@ -49,9 +49,14 @@ class MeetingSearch extends Meeting
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $customer_id = null, $getQuery = false)
+    public function search($params, $customer_id = null, $fromApi = false)
     {
-        $query = $this::find()
+        if($fromApi){
+            $thisQuery = new yii\db\Query; 
+        } else {
+            $thisQuery = $this::find();
+        }
+        $query = $thisQuery
             ->select(['user.username', 'meeting.*'
                 , 'COUNT(CASE WHEN media.type="' . Media::$IMAGE . '" THEN 1 END) as imagesCount'
                 , 'COUNT(CASE WHEN media.type="' . Media::$AUDIO . '" THEN 1 END) as audiosCount'
@@ -89,11 +94,7 @@ class MeetingSearch extends Meeting
 
         $query->andFilterWhere(['like', 'content', $this->content]);
 
-        if ($getQuery) {
-            return $query;
-        } else {
-            return $dataProvider;
-        }
+        return $dataProvider;
     }
 
     public function searchCustomersLates($params, $lateMeetingsIds, $fromApi = false)
@@ -211,9 +212,14 @@ class MeetingSearch extends Meeting
         return $dataProvider;
     }
 
-    public function searchForDeals($params, $deal_id = null, $getQuery = false)
+    public function searchForDeals($params, $deal_id = null, $fromApi = false)
     {
-        $query = $this::find()
+        if($fromApi){
+            $thisQuery = new yii\db\Query; 
+        } else {
+            $thisQuery = $this::find();
+        }
+        $query = $thisQuery
             ->select(['user.username', 'meeting.*'
                 , 'COUNT(CASE WHEN media.type="' . Media::$IMAGE . '" THEN 1 END) as imagesCount'
                 , 'COUNT(CASE WHEN media.type="' . Media::$AUDIO . '" THEN 1 END) as audiosCount'
